@@ -13,10 +13,14 @@
 %custom packages
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[serbian,english]{babel}
+\usepackage[english]{babel}
+
+
+% ovo je iz nnw template:
+\RequirePackage{siunitx}
+\newcommand{\doi}[1]{doi:~\href{http://dx.doi.org/#1}{\nolinkurl{#1}}}
 
 \usepackage[autostyle=true]{csquotes}
-\DeclareQuoteAlias{croatian}{serbian}
 
 % needs this declaration for ayodeji
 \DeclareUnicodeCharacter{1ECD}{\d o}
@@ -482,7 +486,7 @@ Federated learning technique is used a lot for online learning (additional train
 
 In this part of the manuscript we define negative learning as a term taken from cognitive psychology and we describe ways of introducing it to the field of Deep Learning.
 
-\section{Introduction to Negative Learning}
+\chapter{Introduction to Negative Learning}
 
 Negative learning in psychology can be defined in many ways. One way to define it is learning with a negative reward or a penalty. This approach can be directly applied to agent-based algorithms like for example, Reinforcement Learning algorithms. Learning with a negative reward or penalty is described so that an agent can be penalized for its actions if they are deemed inadequate. For a self-driving car for example some actions can be seen as positive and some can be seen as negative. Positive action would be for example stopping at the stop sign, while a negative action can be crashing or speeding. When training these agents, it is necessary to do so with both positive and negative examples of behaviour. This approach takes inspiration directly from human behaviour. Children for example are often disciplined when behaving in a inappropriate way.
 
@@ -527,40 +531,224 @@ In anomaly detection problems algorithms (such as autoencoders) are trained on f
 In this chapter we begin to define negative deep learning methods and provide an overview of possible implementations and use cases. We also provide several necessary definitions before we move to concrete examples in following chapters.
 
 \section{Negative Deep Learning -- Introduction}
+
+By the term negative deep learning in this manuscript we consider all deep learning models, existing and newly-introduced here, which use negative data. Negative data can take many forms which we will discuss in later parts of the manuscript. Negative data can be, depending on the task at hand, missing data, inverse data, wrong data etc.
+
+Negative deep learning models are special in that they can use this negative data as additional information during the learning process. These models use the negative data by employing special architectures and training processes (among other changes) so they can differentiate normal and negative data during training. The necessity and the benefits that we will see later are: increased robustness in different scenarios like partial input classification, adversarial attacks etc, faster convergence, possibility of fine-tuning of existing models and many others.
+
 \section{Possible Models of Negative Deep Learning}
+
+In this section we discuss several approaches to the negative deep learning model implementation. Some of these approaches will be described in great detail in the following parts of the manuscript.
+
 \subsection{Missing Features}
+
+One way of implementing negative deep learning is to use "missing features" in input sample. Term "missing" is not entirely correct as it is very rare that a feature is completely missing from an input sample, rather it is of low activation or low importance. All neural network models use high importance features to learn certain patterns in data. Low importance features (e.g. for a specific class) are also used, but in our negative learning models these features are deemed more important than the others. This allows the model to learn the data patterns not by looking at present, high importance features. The model learns from missing (negative) features in the data and it prioritizes them in the learning process. In a way our model is learning to deduce what pattern in the data should be recognized by looking at all possible features and those which are missing. This perhaps seems simply like a new approach to learning which will not have any benefits, but we have to think what happens in certain scenarios which are proved to be difficult for modern neural network. In partial input classification, the neural network model should be able to recognize patterns in inputs which are not whole or complete. This is where deduction is extremely important. If a human is shown a picture of an animal which has the majority of its contents masked or removed, by observing what features are missing we can eliminate many of the output classes. If feathers are missing, for example, we can certainly say that it is very probably that the image we are trying to recognize is not of a bird. This is what the classification based on missing (we will call them negative in the future) features models are trying to achieve.
+
 \subsection{Partial Input Sample Training}
+
+Similarly to CBOMF (Classification based on missing features) we could achieve similar results if we were to use partial inputs in training. In this way of learning the model is never shown an entire input sample during training, rather only some parts of the input samples. These parts can be obtained manually or for some problems (e.g. in astronomy) they are the only data available, as the whole data is difficult or impossible to obtain. By training the model on partial inputs, we force it to learn the patterns in much finer detail and we expect that the knowledge obtained in this way will also be applicable during testing and usage of the model, when larger or whole input samples are presented to the model. The "negativity" of this model comes from the fact that we can also use parts of the input samples to say what they do not represent. This is additional manual knowledge introduced artificially to the model. But, it is also possible to generate data like this automatically with Negative Output Learning.
+
 \subsection{Negative Output Learning}
+
+During our research for this doctoral thesis, a laboratory in South Korea started doing similar research to ours. Their models and methods are vastly different than ours, but the goal is similar, to introduce negative learning to deep learning models as a new paradigm. 
+
+One approach they examined and which we will also subject to research in our own way is the negative output learning. To explain it simply this is the purest form of negative deep learning and it can be formulated as follows: A neural network is presented with an input sample and which class it does not belong to. The process of choosing the new "negative" output class is simple: we choose a random output class, making sure it is not the positive "correct" one. The difference is in the learning process and the loss function. Rather than trying to minimize the loss function so the model always outputs which class an input sample does not belong to, we use gradient ascent to "pull away" from the negative class and towards some positive class. In the case of m-ary classification only one class is the positive one.
+
+Our approach is similar, but without modifications to the loss function. We simply modify the model so it learns which input samples do not belong to a certain class. We also experimented with gradient ascent without modification of the loss function by transforming the dataset so that the output one-hot vector (in m-ary classification) is inverted so that the actual class has zero value and other classes have the value of one. We will see that these models work best when used in combination with traditional neural network models. This approach will be described in great detail in later parts of the manuscript.
+
 \subsection{Ensemble Networks and upgrades of existing models}
+
+In our experiments it was made clear that many negative deep learning models work really well on their own. However since the paradigm of learning changes greatly it is sometimes beneficial to use these negative models in conjunction with traditional deep learning models. This idea came from our first negative deep learning model, the CBOMF model. This model when compared to a normal model of same architecture shows increase in accuracy when testing on samples with parts missing or occlusions. However, we discovered that the accuracy increase was not absolute. In other words, our model learned to classify some new examples from the testing portion of the dataset, but also lost the ability to classify samples which the traditional model was able to classify. The number of these cases was smaller than the newly classifiable samples, but the increase in accuracy was not absolute. The best result would be of course, if our model was able to classify everything that the normal model can classify and then on top of that to classify new previously wrongly classified samples. One approach to this problem is to use an ensemble model of the two networks: positive and negative which takes inspiration from the Siamese neural network architecture. These models were named synergy networks and they will be discussed later in the manuscript.
+
 \subsection{Agent Environments}
+
+Lastly, negative models show promise in agent environments. The main problem for agent based deep learning algorithms (e.g. Deep Q learning) is that the environments are often noisy and it is difficult to deduce what action should be chosen in a certain point in time. By using negative models we could help the agent to immediately discard many of the wrong actions so that the chances of it selecting the correct action are greater. Also, in cases where there is no correct action, we want to choose the action which is less incorrect in the negative modelling type of thinking. These changes can be implemented with negative deep learning models, e.g. negative output learning models where the agent would have additional knowledge in every step which actions should not even be considered. Negative Deep Reinforcement Learning models will be discussed towards the end of this manuscript.
+
 \section{Negative Deep Learning Use Cases}
-\subsection{Object Detection and Image Classification with Occlusions}
+
+In this section, after we introduced several ways of having negative learning in deep learning models, we discuss some of the use cases we discovered are compatible with our new models. New use cases are certainly to be discovered, in this section we only present those which are already tested with beneficial results.
+
 \subsection{Neural Network Robustness}
-\subsection{Neural Adversarial Attacks}
-\subsection{Black-box attacks}
-\subsection{White-box attacks}
+
+Neural Network Robustness has become quite a hot topic in Deep Learning research, especially in the last few years. Neural networks, among other machine learning models, have been used for some time as a "black-box" type of solution for many different tasks. However in recent times, many uses were found in which neural networks perform critical, life influencing calculations and decisions. Therefore it is important that they have the same or similar performance to humans in difficult situations. When we say difficult situations, it means situations which were not encountered during training or testing of the models and in which humans usually perform much better than artificial models. One example we mentioned already is in partial image classification, where humans are usually able to classify even parts of the images and we want that same quality to exist in artificial neural network models.
+
+\subsubsection{Object Detection and Image Classification with Occlusions}
+
+Neural network, and especially convolutional neural networks have been used very successfully in the field of computer vision. In computer vision tasks we perform image learning which allows us to detect classes to which the image belongs to, objects in images, different segments of an observed image (image segmentation), video processing and many other tasks. Since images are well structured two-dimensional (or three-dimensional for color images) arrays of pixel data, convolutional neural networks which work best with structured data perform very well. In fact, CNNs are still, since their inception, state-of-the-art algorithms in many image related tasks. 
+
+Regarding negative learning and robustness in image related tasks, we will discover later on in this manuscript that several negative learning models exist which significantly improve performance in the case of occlusions (object behind object, or object behind mask), and partial inputs. If we present the models with additional negative learning information, they learn the image space better and are able to classify better in difficult cases, which are very present in the real world. One excellent example for this type of application is self-driving cars. A self-driving system in cars must be able to correctly recognize road signs even if they are partially obscured by other vehicles, trees and other common objects. This is where models which are resilient to occlusions are not just necessary but essential for safety. One similar example is in case of damaged or dirty camera lenses in self driving cars. The system should not stop working if the image is blurry or partially damaged, again the case for robust models.
+
+\subsubsection{Neural Adversarial Attacks}
+
+In recent years, many methods have been discovered in the field of Adversarial Attacks. While some have been used for new applications previously thought to be impossible like Generative Adversarial Networks, some have also been used to show that neural networks are very sensitive models when it comes to adversarial attacks. An adversarial attack is an attack in which the input signal is modified slightly in a way that the model used to process it makes a mistake. For example, in image classification we can add noise to the pixel data of an image so it is wrongly classified by a highly performant model. Some of the most advanced modern approaches to adversarial attacks can even modify images in a minimal way so they still look the same to humans, while they are wrongly recognized by modern CNNs. Adversarial attacks can also be used for other types of networks, not just images. 
+
+Adversarial Attacks are also important in critical systems, as they can be used by individuals with malicious intent. Therefore, we need to make models which are less susceptible to these attacks, and we will show that negative learning models presented in this dissertation are of better performance when compared to traditional neural network models.  
+
+Depending on the algorithm and the openness of the model which is being attacked we define two large subsets of adversarial attacks, black-box attacks and white-box attacks. We will demonstrate performance of different negative neural network models on both types of the attack in further parts of the document.
+
+\subsubsection{Black-box attacks}
+
+Black-box attacks are one type of adversarial attacks used to fool neural networks into wrongly processing some data. Black-box type of attack got its name from the nature of the algorithm. To explain, this type of attacks is not aware of the neural network internal structure, weights and other properties. It only uses it as a black box. It makes different modifications to the synthetic input data (starting from random) to see what noise can be added so that the attacked model makes certain assumptions. Then that noise can be added to different real input samples, and they are wrongly processed then. 
+
+\subsubsection{White-box attacks}
+
+White-box attacks differ from black-box attack in that they have full knowledge of the attacked model and are using this information to directly influence the network so that it makes mistakes.
+
+% PROSIRITI
+
 \subsection{Negative Neural Networks for Regression Tasks}
+
+It is important to say that while we only mentioned classification tasks and the usage of negative neural network models in that regards, they can also be used for regression tasks. First way is if we discretize the output space so that a regression tasks is perceived as a classification task. But, negative models can also be used for regression tasks without modification. It is easy to think of what a negative sample would look like in a regression task. In regression task we have data pairs of input features and an output value. A negative sample would be different in that for a certain set of input features we would know what the output should not be. So our model could adjust its parameters so the output is pulled away from the given negative output. The uses for this type of models are quite similar to other use case we described already. For tasks where the output is unknown but we know what the output certainly is not we could incorporate additional knowledge in the form of negative samples which then can be used to improve our model performance. 
+
 \subsection{Other uses}
+
+Another important use which we did not mention so far for both classification and regression tasks is inclusion of fail-safes in the deep learning models. The main issue with many deep learning models used in critical systems is that it is discovered that in certain critical scenarios unseen during training (e.g. late emergency braking in self-driving cars) they perform poorly. The developers of these models than program fail-safes in the code which prevent the model from making these mistakes in the future. These fail-safes are usually hardcoded outside the models and are difficult to maintain. The inclusion of negative-learning patterns can be perceived as a type of fail-safe programming used to include specific scenarios into the deep learning models. The difference is that these samples are properly integrated into the models, and they do not differ in that way from other data used for training.
+
+We mentioned already the type of synergy negative learning model where two models are used in parallel to process some data with increased robustness. It is important to state that the synergy model we define in this manuscript can be used with any existing CNN (or other type of model). This is important from an integration standpoint, where we want to upgrade existing models in critical system. The synergy model can be seen as a pure upgrade of a traditional neural network model, which is still being continuously used alongside the negative model. We will also how how a special hyperparameter can be used which dictates which model has greater importance, if necessary.
 
 \part{Classification Based On Missing Features}
 
-\chapter{Introduction}
-\section{Intuition behind Missing Feature Representations}
-\section{Examples of deduction with Missing Features Classification}
+In this part of this doctoral dissertation we define the first negative deep learning model. Classification Based on Missing Features negative deep learning model emphasizes missing (also called negative or low-importance) features of the input sample providing additional knowledge to the underlying neural network. This in turn creates a model more robust to problems like partial input classification and classification with occlusions as will be demonstrated.
 
-\chapter{Motivation}
+\chapter{Introduction}
+
+As we mentioned in the introduction, artificial neural networks, notably Convolutional Neural Networks are widely used for classification purposes in different fields such as image classification, text classification and others. It is not uncommon therefore that these models are used in critical systems (e.g. self-driving cars), where robustness is a very important attribute. All Convolutional Neural Networks used for classification, always use present features to figure out what the output class is. In other words, even though for many problems there is a finite set of features that are possible only the features that are present are used for classification. Here we discuss a novel approach of doing the opposite -- classification based on features not present in the input sample. Our approach is guided with intuition that neural networks can and should also take into consideration the features that are missing. For example for humans, when classifying images, it is beneficial to also look what is not present in a given image, and if we know all the possibilities, then we can deduce what the given image actually represents. Our modification to the training process and models tries to mimic this ability.
+
+The results show not only that this way of learning is indeed possible but also that the trained models become more robust in certain scenarios. The approach presented in this manuscript can be applied to any existing Convolutional Neural Network model and does not require any additional training data. 
+
+\section{Intuition behind Missing Feature Representations}
+
+In this section we explain the intuition behind missing feature importance and representations.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.5, trim=0pt 0pt 0pt 0pt, clip]{motivation} 
+  \caption{A motivational example where classification based on missing features would work in our dataset. Digit "5" from the MNIST dataset and its missing features named here: Feature 1 (on the left, circle-like feature) and Feature 2 (on the right, corner-line feature).}
+  \label{fig:sample-motivation}
+\end{figure}
+
+In Fig.~\ref{fig:sample-motivation} we can see an example. Consider the given image of digit~5 (on the left) and two illustrative, very high-level features from our network model. Digit~5 can be defined in many ways, one of which is as "a digit missing these two features" (features are smaller squares on the right). To clarify, features are kernels (filters) from the convolutional layers in our model. Circle-like Feature 1 given here is present in digits 0, 6, 8, 9 while a sharp corner-line Feature 2 is present in digits 1, 2, 3 (e.g. top-right corner, or the middle part), 4, and 7. Digit 5 does not have these features, therefore we can check the input image and see if these features are missing. If they are, we can safely assume that we are looking at digit 5. This is not the only example where this is possible and this example is only given to clarify our way of thinking about "missing feature classification". 
+
+In the following section section we discuss the motivation for developing more robust models not only for image processing but for various fields in deep learning applicable research.
+
 \section{Robustness of Image Classifiers}
-\section{Partial Input Classification}
+
+For a wide-spread adoption of systems that rely on neural networks it is needed to improve the current standard ways for training so the networks can be better prepared for intentional attacks and uncertain situations. It is very easy to describe this problem on the now standard task where neural networks are used -- image classification \cite{krizhevsky2012imagenet}. Neural networks are widely used for image classification, especially ones with convolutional layers. However, new research is taking place to investigate how these networks can handle real-world situations where there is noise in the image, the image is of low quality or where image is not given in full \cite{carlini2017towards, bastani2016measuring}. 
+
+\subsection{Partial Input Classification}
+
+Classification based on missing features, as presented here, is a new area of research in the neural network research field. We believe this new family of neural network models can be used in many different scenarios. The main benefit of these models described here is increasing robustness in partial input classification which is related to the neural network robustness, a growing topic in neural network research \cite{carlini2017towards}.
+
+Our approach of classification based on missing features, as we will show, certainly can improve image classification accuracy with convolutional neural networks when they are faced with a task to classify an image by only seeing one part of it (partial input samples).
+
+One example which is to benefit from this approach is when working with traffic signs. In self-driving cars -- a critical system that uses neural networks \cite{bojarski2016end}, traffic signs are processed as inputs from many cameras on a vehicle. These cameras are not perfect, but they produce very high quality images and usually the model used can easily detect and classify all traffic signs present in any given image. But what happens when a traffic sign is obstructed by another object, for example a tree or another car? A person in a similar situation can deduce what sort of a sign it is just by looking at one part of it and it is reasonable to require from the CNN models to be able to do the same. 
 
 \chapter{Implementation}
 
+In this chapter implementation of the classification based on missing features is explained. It is shown that for the image classification problem it is not only possible to train the models using only missing (negative) features, but also that these models show an increase in robustness when compared to traditional models of the same architecture.
+
+In our experiment we decided to use widely known MNIST \cite{lecun1998mnist} dataset of handwritten digits. In addition to MNIST we also validated our work with the Extended MNIST dataset also known as EMNIST \cite{cohen2017emnist}.
+
+MNIST dataset consists of 60000 training examples (pairs of images and labels) and 10000 testing or validation examples. To try and mimic a real life scenario where we wanted to test out our neural network model, we decided to make a few other validation sets which also contain 10000 examples. The way we did it is that we took the testing examples and removed some parts of every image, while keeping the label intact. It is important to clarify that we did not modify the training dataset. It is crucial to be able to train the network on the complete images, because in a real-world scenario we are unlikely to have partial inputs available for training. Also, we wanted to check if our network modification affects the standard, unmodified inputs.
+
+\section{PMNIST dataset}
+
+We did not want to limit ourselves to only one validation set because it is difficult to decide what data should be removed from the images. So we created multiple validation sets:
+
+\begin{itemize}
+  \item Horizontal cut dataset (top half removed) 
+  \item Vertical cut dataset (left half removed)
+  \item Diagonal cut dataset (two diagonal quarters of the image removed -- top-right and bottom-left)
+  \item Triple cut dataset (three \(9x9\) pixel squares removed from coordinates (5, 5), (17,10), and (7,16) -- this is roughly 30\% of the input image removed, but the locations were chosen so that they cover vital parts of the digits (occlusion simulation)
+\end{itemize}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.5, trim=0pt 0pt 0pt 0pt, clip]{datasetimages} 
+  \caption{Example of digit 3 in our validation set; From left to right: unmodified -- original version, horizontally cut image -- top half removed, vertically cut image -- left half removed, diagonally cut image -- first and third quadrants removed, "triple cut" image -- three squares removed as described before}
+  \label{fig:dsexamples}
+\end{figure}
+
+We will refer to this dataset as PMNIST or partial MNIST dataset. The final created dataset then consisted of:
+
+\begin{itemize}
+  \item 60000 training examples (unmodified)
+  \item 10000 test examples (unmodified) 
+  \item 10000 horizontally cut validation examples  
+  \item 10000 vertically cut validation examples 
+  \item 10000 diagonally cut validation examples
+  \item 10000 "triple-cut" validation examples 
+\end{itemize}
+
+For the EMNIST dataset, we did exactly the same for two of its subsets. We first used the EMNIST-MNIST dataset whose structure is similar to MNIST dataset to validate our results, and then we tried our networks on the EMNIST-Balanced dataset which contains 131600 characters of digits and letters with 47 different classes for classification. 
+
+The EMNIST-MNIST dataset, contains 60000 images and labels in the training set and 10000 images and labels in the test set -- exactly the same number of samples as in MNIST dataset. We used the process described above to generate four new validation sets, same as with PMNIST dataset. As for the EMNIST-Balanced dataset the same 85/15\% training and testing split was used to get a training set of 112800 images and labels and a test set of 18800 images and labels. Then, we generated four new test sets of size 18800, with different partial inputs for validation, same as before.
+
+As both EMNIST and MNIST datasets have images of the same size (28x28 pixels) we used the exact same model architecture except for the last layer in the neural network which had to be changed to accommodate different number of classes in different datasets. The model is described in great detail in the following section.
+
+It is important to note that during training the test sets and the newly introduced validation sets are not used. We want to completely avoid "peeking" at our validation data. That is why we split our dataset into three subsets: for training, testing and validation. All the models are trained and tested on complete input and output images and then validated on all validation data sets.
+
+Another important remark is that approach described in this manuscript can work on any dataset, not just digits, letters etc. We chose these datasets because we can very clearly describe the features and their presence in a sample. With other datasets which have color or larger images this approach would still work but the features would be more difficult to interpret.
+
+\section{Used Model architecture}
+
+For the purpose of testing our theory a fairly standard model was used. The model is a default example model used in machine learning frameworks (e.g. PyTorch \cite{paszke2017pytorch}), so it was a good starting point for us to experiment with.
+
+The model consists of five layers ordered in a common way -- a number of convolutional layers followed by a number of fully connected layers:
+
+\begin{enumerate}
+  \item Input layer -- 2D grayscale image of size \(28x28\) pixels
+  \item 2D Convolutional layer 1 -- 20 kernels of size \(5x5\), with max-pooling of stride 2, and ReLU activation function 
+  \item 2D Convolutional layer 2 -- 50 kernels of size \(5x5\), with max-pooling of stride 2, and ReLU activation function
+  \item Fully-connected layer 1 -- 500 neurons, ReLU activation function
+  \item Fully-connected layer 2 -- 10 output neurons for MNIST and EMNIST-MNIST cases, 47 output neurons for EMNIST-Balanced case, Softmax activation function
+\end{enumerate}
+
+We used SGD (Stochastic Gradient Descent) with learning rate of 0.01, and momentum of 0.5. These values were also not changed from the given model. Again, the given model was not modified in any way apart from introducing the conditional negation of the output vector of the last convolutional layer, as described in the following section. A performant model can used, and we will demonstrate how it performs with our modifications later in the dissertation. More on the model choice can be found in Section \ref{modelchoice}.
+
+% dodati referencu na resnet u sinergiji
+
 \section{The Negative Function}
+
+In the introductory section we showed an example where it is easy to see how missing features can be used to classify a digit. While this example shows what we want to do it requires some additional knowledge about the data used. We want to use standard datasets without any additional knowledge so our approach can be used in any scenario. The main question was how can we obtain the missing features in the input sample. In this and the following sections we will explain how we can use existing knowledge from convolutional layers obtained with normal training in our modified approach. 
+
+\subsection{Missing vs. negative features}
+
+We also realize that the features in these features vectors are not binary. For a person it is very easy to decide whether a feature is either present or not present in an image. Neural networks are more flexible and can also say "how much" a feature is in a given sample. If the features were binary it would be trivial to find all the missing features in an image by replacing values in the feature vector with their opposites. Also, at this stage, it is very hard for us to say which missing features are more important than others, we simply try to classify based on all missing features. The term missing features is also not fully correct therefore, since it is very rare for a feature to be completely missing from the input image. That is why we use the term "negative feature" or "low-importance feature" interchangeably with the term "missing feature" throughout this document to emphasize this property of the features represented in an image.
+
 \subsection{Activation Function Experiments}
-\subsection{Negative Convolutional Kernel Experiments}
+
+For our approach of classification on missing features the model had to be modified slightly. We modified the forward pass in the network to negate the vector which represents what features are present in an image. When negated, this vector will represent what features are not present in an image. To demonstrate on an example, imagine a feature vector where 1 denotes a present feature and 0 denotes a missing feature. By simply replacing zeros with ones and vice-versa we can obtain a vector with all the missing features in the feature vector.
+
+The negation process takes place between the exit of the last convolutional layer in a network and the entry to the first fully connected layer. It can be applied after the activation function application in the last convolutional layer, or by modifying the activation function as we will cover later. At that point the signal passed through the neurons is simply a feature vector describing what features were detected by convolutional layers. 
+
+The negation operation largely depends on the activation function of the last convolutional layer. We have to negate the vector in a way that it represents the complete opposite of what would be the output of an unmodified network. The term "negate" probably can be replaced with "invert" in cases of some activation functions. 
+
+For example, for hyperbolic tangent function (\(tanh\)) which is used as an activation function in neural networks a simple negation is enough. The \(tanh\) function always returns a value between \(-1\) and \(1\). If we agree that a present feature is represented by a value close to \(1\) and an absent feature is represented by a value of close to \(-1\), it is easy to see that negating a whole vector of \(tanh\) outputs would provide us a vector of features that are missing.
+
+Rectified linear unit (\(ReLU\)) \cite{maas2013rectifier} functions are also widely used in neural networks. The \(ReLU\) function is different than the \(tanh\) function in that it returns values between zero and positive infinity. Here, simply negating the vector would not work, but calculating a new vector is not complicated. The output with a positive value represents a present feature and the value of zero represents a missing feature. If we apply a simple function as such:
+%
+\[
+    f(x) = 1 - x
+\]
+%
+we will get a vector representing what features are missing from the input image. 
+
+In our model there were a total of 800 values (a vector of length 800) which is the output of the last convolutional layer and the input to the first fully connected layer. This vector represents all the present features and their positions in the input sample. As we are using (\(ReLU\)) activation function, we can negate the vector using the formula above.
+
 \subsection{Influence of the Negative Function in forward and backward passes}
+
+The implementation of the mentioned modification is very simple in PyTorch library. We only need to modify the "forward" function of the neural net Python module to negate the vector at a specific stage. The backwards pass is calculated automatically with autograd \cite{paszke2017automatic}.
+
+\subsection{Negative Convolutional Kernel Experiments}
+% TODO
 \subsection{Influence of multiple-step training}
+% TODO
 \subsection{Negative feature selection process}
+% TODO
 \subsubsection{Detecting relevant features per-class for negation}
+
+% TODO
 
 \section{Training process}
 
@@ -568,11 +756,29 @@ In this section training processes related to the negative learning method are d
 
 \subsection{Multi-phase training}
 
-During the Negative Deep Learning model/hypothesis testing one interesting concept was used -- multi-phase training. Multiple phase training is a training process where after a number of training epochs some layers are frozen and reused and some of the layers are reset. In a way, multiple phase training is a regularization technique similar to Dropout with P=1.0 where some layers are completely destroyed and retrained during training. 
+The training processes are also modified from the standard process. The unmodified network is trained for 10 epochs in the provided model. After that, no significant increase in accuracy is noted, as the network already gets around 99\% accuracy on the test set.
+
+During the Negative Deep Learning model/hypothesis testing one interesting concept was used -- multi-phase training. Multiple phase training is a training process where after a number of training epochs some layers are frozen and reused and some of the layers are reset. In a way, multiple phase training is a regularization technique similar to Dropout with \(P = 1.0\) where some layers are completely destroyed and retrained during training. 
 
 In our concrete example multiple phase training was used to extract and reuse convolutional layers from an image classification model. After a number of epochs all the convolutional kernels were extracted and used in other (negative) models.
 
-\subsection{Convolutional Kernel Freezing}
+\subsubsection{ONN Model}
+
+The first training process tested is to simply apply the model upgrade we described in the previous chapter and train the network normally. We called this model "ONN" (only negate network). Although this approach gives us some improvements, it does not represent fully what we wanted to do. Because the network is modified to negate the vector representing the features in the input image, we observed that our new model adapted to our layer inversion modification. The change affected the backwards pass in the network so the convolutional filters in convolutional layers were completely different opposed to the standard network. In other words, the features found in input images were not the same -- the network learned them in a different way. As we wanted the features to remain the same and only to modify the later stages of the network, we thought of the second training process which allows this. Our goal is to classify on the same features but to emphasize those which are missing.
+
+\subsubsection{Hybrid training mode (first actual negative model)}
+
+The second process requires a few extra steps and is as follows. The training process begins for a number of epochs where the "negation layer" is inactive. This is so that the convolutional layers inside the network learn all the features in the training data. In this step the filters inside the convolutional layers will learn both the high-level and low-level features of digits given the digit images from the dataset. We do this training step for 10 epochs, which is enough for the model to learn the features well enough.
+
+The next step consists of freezing the convolutional layers and resetting the fully connected layers. The freezing of convolutional layers is necessary so that the further training does not affect them. The features represented in the convolutional kernels are learned already and we do not wish to modify them. The convolutional layers are simply going to be used for feature extraction at this and future points. 
+
+Resetting the fully connected layers is also necessary as we want the network to start over the learning process but to classify based on the missing features in an image. Resetting the layers simply means re-initializing them with the same initializer used in the model setup.
+
+With the features learned, convolutional layers frozen and fully connected layers ready for new training, we can activate the modification in the model which will negate or invert the output of the convolutional layer. This is made possible by dynamic nature of execution which is available in PyTorch neural network library. This is the main reason why it was chosen to be used for this work. 
+
+The training is then continued on for another 10 epochs, making it 20 epochs in total which is more than normal training. It is important to clarify that while our modified network is in total trained for 10 epochs more than the standard network its fully connected layers are reset after the tenth epoch making it so the final models are equal in quantity of training received. Convolutional layers only receive the 10 epochs of training also, before being frozen. This approach is a hybrid between normal and our new way of training so we called it "HN" ("hybrid network").
+
+\subsubsection{More on Convolutional Kernel Freezing}
 
 For most of here mentioned models we use freezing of convolutional kernels. Freezing is a process of setting convolutional layers as fixed, constant values after they have been learned. The freezing of the convolutional layers is important from the analysis standpoint as we want to test our model modifications which are currently after the convolutional blocks. If we were not to freeze the convolutional layers, they would change their parameters during training -- and this is not desired behaviour. 
 
@@ -580,42 +786,610 @@ Freezing of the layers is a procedural process where one has to iterate through 
 
 Freezing of the convolutional layers (or other parts of a neural network models) is a common technique when using pre-trained models. The idea behind pre-trained models is simple: a model trained on a dataset (usually large, not easy to retrain) is extended with few layers on top to be used for some different task. One example where this approach is popular is with image classification. There, it is common to use very deep and complex models trained on the ImageNet Dataset as frozen feature extractors. In addition, a simple fully-connected neural network is added "on-top" of the ImageNet model and trained to classify custom image datasets.
 
+\subsubsection{Modified Hybrid Training Processes}
+
+We also experimented with some modifications to the hybrid training process.
+
+The first modification to our described process is to skip resetting the fully connected layers after the features were learned (referred in the results tables as "NR" -- "no reset").  In a way, this means that the network continues training after this step but in a different way. The reasoning for this approach is that there may still be useful weights in our fully connected layer which can improve the model accuracy even after we have trained with our inversion modification in place. We wanted to try to combine standard training with our modified way to see if synergy between standard and our training process has any effect.
+
+Another modification we tried is to alternate between normal training and training with inversion modification. For a number of epochs, we train the network so that one epoch the network is unmodified and another epoch is with the inversion modification in place. This is an extension of the previous modification because we wanted to make sure that the order of training is not important. This method we called "ALT" method as it alternates between ways of training. We also noticed that the "ALT" training model works best with smaller learning rates. When using large learning rates, the model would change the weights too much when switching from one way of propagation to another. This is something to be aware of, if using this approach.
+
+\subsubsection{Note on training process}
+
+For all processes and models, because random initialization is used we made sure to test several times to avoid any coincidental results. In development stages a constant random seed method was used for reproducible results.
+
 \chapter{Testing}
 
+In this chapter we describe the testing process where we validate our models.
+
 \section{Results on the MNIST and PMNIST datasets}
-\subsection{PMNIST dataset}
+
+Since we are introducing a new neural network model in this work, we decided that the best baseline in comparing the results would be a traditional neural network with the same architecture ("SN"). This way we can be sure that our modification in the model is what we are benchmarking.
+
+\subsection{Note about model choice} \label{modelchoice}
+
+We are aware that a model architecture which would give even better results compared to our own model probably exists. It is a very difficult task in finding such a model, while making sure that our modification actually does affect the accuracy increase. This is why we decided to test our approach on a very well-known model to see how it behaves. Since our modification is simple and can be applied to any CNN model, we will definitely experiment with other models (network architectures) on our newly introduced validation sets to see how they perform.
+
+After testing the models on the mentioned datasets we obtained the following results. First, we present the results on unmodified testing sets.
+
+\begin{table}[h]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {Unmodified MNIST} & {99.13} & {98.90} & {99.18} & {99.21} & {99.05} \\
+    {Unmodified EMNIST-MNIST} & {99.18} & {99.07} & {99.16} & {99.15} & {99.00} \\
+    {Unmodified EMNIST-Balanced} & {87.14} & {87.62} & {87.38} & {86.78} & {87.92} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models and unmodified testing datasets. Here, SN denotes the standard, unmodified network, ONN denotes the network only trained with layer negation and HN denotes Hybrid network which was trained normally for a number of epochs but was then switched to negate the output of the last convolutional layer. The NR and ALT models are trained as explained in previous section. NR model is the model which is not reset (NR) after the inversion modification and the ALT model is extension of the NR model where the normal and inversed training takes place in alternating (ALT) epochs. All the values are percents which depict validation accuracy of a network on a given dataset.}
+  \label{tab:results-unmodified}
+\end{table} 
+
+As seen in Tab.~\ref{tab:results-unmodified} the modified network models performed better in almost all of the standard unmodified test sets showing that classification on missing features does slightly improve accuracy when the input sample is given in full. We want to emphasize that this method of training while longer and slower does not negatively affect the network performance when the input is given in full. This is something we were hoping for to be achieved. These results also show that our initial assumption was correct -- it is possible to train a neural network to classify based on missing features.
+
+In Tab.~\ref{tab:results-pmnist}, \ref{tab:results-emnistmnist} and \ref{tab:results-emnist} we present the accuracy percentages on the newly introduced validation sets. In Tab.~\ref{tab:results-pmnist} we show the results on the four PMNIST validation sets while in Tab.~\ref{tab:results-emnistmnist} and \ref{tab:results-emnist} we present the result on the four validation sets generated for EMNIST-MNIST and EMNIST-Balanced datasets, respectively.
+
+\begin{table}[h]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {Horizontal cut} & {44.71} & {48.96} & {52.33} & {56.07} & {41.60} \\
+    {Vertical cut} & {57.46} & {64.64} & {60.45} & {66.07} & {69.66} \\
+    {Diagonal cut} & {52.97} & {59.59} & {55.40} & {56.01} & {62.49} \\
+    {Triple cut} & {40.68} & {34.62} & {41.19} & {41.73} & {46.40} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on newly introduced PMNIST validation sets.}
+  \label{tab:results-pmnist}
+\end{table} 
+
+\begin{table}[h]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {Horizontal cut} & {49.07} & {51.34} & {54.76} & {48.70} & {48.73} \\
+    {Vertical cut} & {31.10} & {28.10} & {32.91} & {28.62} & {31.12} \\
+    {Diagonal cut} & {58.43} & {61.22} & {59.37} & {58.18} & {61.50} \\
+    {Triple cut} & {46.78} & {49.63} & {53.90} & {48.99} & {47.44} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on newly introduced EMNIST-MNIST validation sets.}
+  \label{tab:results-emnistmnist}
+\end{table} 
+
+\begin{table}[h]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {Horizontal cut} & {20.95} & {26.97} & {26.34} & {19.32} & {26.53} \\
+    {Vertical cut} & {22.23} & {20.02} & {22.19} & {19.50} & {24.36} \\
+    {Diagonal cut} & {27.91} & {30.14} & {30.79} & {25.80} & {26.83} \\
+    {Triple cut} & {20.39} & {22.88} & {21.07} & {21.81} & {19.83} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on newly introduced EMNIST-Balanced validation sets.}
+  \label{tab:results-emnist}
+\end{table} 
+
+\begin{table}[h]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=12.1]S[table-format=32.1]S[table-format=42.1]}
+    \toprule
+     \textit{Dataset} & {Best model} & {Accuracy} & {Delta} \\
+    \midrule
+    %TODO
+    {Unmodified - PMNIST}  & {NR} & {99.21} & {0.08} \\
+    {Horizontal cut - PMNIST} & {NR} & {56.07} & {11.36} \\
+    {Vertical cut - PMNIST} & {ALT} & {69.66} & {12.20} \\
+    {Diagonal cut - PMNIST} & {ALT} & {62.49} & {9.52} \\
+    {Triple cut - PMNIST} & {ALT} & {46.40} & {5.72} \\
+    {Unmodified - EMNIST-MNIST} & {HN} & {99.16} & {-0.02} \\
+    {Horizontal cut - EMNIST-MNIST} & {HN} & {54.76} & {5.69} \\
+    {Vertical cut - EMNIST-MNIST} & {HN} & {32.91} & {1.81} \\
+    {Diagonal cut - EMNIST-MNIST} & {ALT} & {61.50} & {3.07} \\
+    {Triple cut - EMNIST-MNIST} & {HN} & {53.90} & {7.12} \\
+    {Unmodified - EMNIST-Balanced} & {ALT} & {87.92} & {0.78} \\
+    {Horizontal cut - EMNIST-Balanced} & {ONN} & {26.97} & {6.02} \\
+    {Vertical cut - EMNIST-Balanced} & {ALT} & {24.36} & {2.13} \\
+    {Diagonal cut - EMNIST-Balanced} & {HN} & {30.79} & {2.88} \\
+    {Triple cut - EMNIST-Balanced} & {ONN} & {22.88} & {2.49} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with showing what models worked best with different test and validation sets. The "Accuracy" column shows final, highest accuracy achieved while the "Delta" column shows accuracy gain over the standard unmodified network. Both "Accuracy" and "Delta" columns are given in percentages.}
+  \label{tab:results-final}
+\end{table}
+
+When comparing our training processes or models (Tab.~\ref{tab:results-final}), it is clear to see that some of them perform better in certain scenarios. However, apart from the 0.02\% accuracy loss on the unmodified EMNIST-MNIST test set, it is uniform that the newly introduced models featuring some shape of classification based on missing features outperform traditional neural network models, and in some cases by large margins. This is the most important finding in this experiment with our new models.
+
+We also notice that models which use convolutional layer freezing outperform the model which just negates the convolutional feature vector (ONN). Also, strong performance of ALT network suggests there is some benefit of combining traditional neural network models with our newly introduced ones. As for choosing what model would work best in a certain scenario, it is difficult to say with certainty. We suggest trying different models and deciding by testing them. 
+
+The different datasets we used all behave similarly. We see the largest accuracy increase of 12.2\% with the vertical cut validation set in the PMNIST set.
+
+\subsection{Summary of the first experiments}
+
+Here we present concisely the summary of experiments with the classification based on missing features:
+
+\begin{itemize}
+  \item It is possible to train a convolutional neural network to classify based on missing features in the input sample.
+  \item Our approach of "negating" feature vectors before passing them to fully connected layers implements this idea and shows that this simple modification can help in a scenario where a partial input is given.
+  \item The performance of convolutional neural networks, as expected, degrades greatly when we use partial inputs. 
+  \item The PMNIST dataset and other partial datasets based on EMNIST dataset, can be used for checking how a network behaves when given a partial input to classify.
+  \item We also showed four similar but different training techniques to maximize the usefulness of our modification. These training techniques can be used to experiment with different datasets.
+\end{itemize}
+
+The results show that classification based on missing features is possible and that these new models we introduced help in partial input scenarios. Our approach, albeit much simpler than some other approaches (e.g. training with adversarial examples) can also help with a very difficult real-world problem of having partial inputs to classify in a critical environment. The partial input example is only one of many use cases for our models that we hope to discover.
+
 \subsection{Corner occlusions}
+
+% TODO
+
 \subsection{Image Perturbation Experiments}
+
+% TODO 
 \subsection{Differences in activation functions}
+
+% TODO
 \section{Robustness to Adversarial Attacks}
+
+A topic which should be mentioned here is adversarial attacks on neural networks research \cite{bastani2016measuring}. 
+
+There have been some research papers similarly exploring how to increase robustness of neural networks when the inputs have been tampered with. However, our approach is not directly comparable with their approaches for many reasons i.e. different network architectures, usage of partial inputs in training, usage of adversarial examples in training, etc.
+
+In \cite{globerson2006nightmare} the MNIST \cite{lecun1998mnist} dataset used in our work was also used to investigate robustness of neural networks. In our paper parts of the input image were removed as will be explained later, while the authors in \cite{globerson2006nightmare} describe a way to combine two images as an adversarial example input.
+
+\cite{szegedy2013intriguing} and \cite{goodfellowexplaining} described also on the MNIST dataset different modifications to the input image which affect the model greatly. In \cite{szegedy2013intriguing} MNIST dataset was used to investigate how different elements in input images maximize some network activations. The second part of the paper describes an adversarial attack on the network using previously gathered information. Our paper differs from this paper in that we are investigating how missing features are affecting classification instead of what features affect it the most, and that we are also using a convolutional neural network, while in this paper a traditional multi-layer fully connected network is used. Also in the mentioned paper, authors suggest that training with a mixture of adversarial and clean examples is a way to achieve better performance. In our case, we did not want to train on our generated adversarial (partial) examples, as will be explained later. Similarly in \cite{goodfellowexplaining} adversarial examples are being used to increase neural network robustness, but they are being used during training. 
+
+% TODO
 
 \part{Synergy of Traditional and Classification Based On Missing Features}
 
+In the previous part of this dissertation we have shown and experimented with a new type of learning applicable to all convolutional neural networks: Classification Based on Missing (low-impact) Features. In the case of partial inputs/image occlusion, we have shown that our new method creates models that are more robust and perform better when compared to traditional models of the same architecture. In this part we explore an interesting characteristic of our newly developed models in that while we see a general increase in validation accuracy we also lose some important knowledge. Then we propose one discovered solution to overcome this problem and validate our assumptions against CIFAR-10 image classification dataset which has more complexity than the previously used MNIST dataset.
+
 \chapter{Overview of Ensemble Learning Techniques}
+
+Ensemble Learning is a process in which multiple machine learning models are used for a single task. The reason for doing this is that with more than one model we can have more than one "opinion" and therefore we have greater probability that the ensemble model as a whole will perform better.
+
+The simplest example is the Random Forest machine model which uses many decision trees and a voting system in classification and regression tasks. By not limiting the model to a single decision tree, we can learn much more information about the patterns in the training data and incorporate that knowledge in different sub-systems (decision trees) of the ensemble learning model.
+
+Ensemble Learning can also be used in Deep Learning. One good example is in the multi-modal systems, where we need to make some decision or recognize some pattern based on different heterogeneous data. For example if we have a model which accepts an image and text describing that image and we want to output whether the description is correct we would need to use a multi-modal neural network system. In a such system one model would be used for processing the image and another one would be used to process text. Together, they would then produce some output. This has many benefits, the most obvious one is that we can use different type of neural networks for different tasks which can mean that we have increased performance. It is much better to use a recurrent model for text and a convolutional model for images (this is just one example) rather than one singular fully-connected model.
+
+Our synergy network described here takes inspiration from ensemble learning models and the Siamese neural network model. In synergy networks as we will see, we have two models working in parallel. These models share some weights and have the same architecture but one of them is a negative model while the other is the "positive" or a normal neural network model.
+
+% TODO ovaj chapter srediti malo, ili mozda pomeriti dole
 \section{Experiments with different network joining techniques}
+
+In synergy nets, one of the questions which needs to be answered is on model joining. In other words how can outputs of two models be joined and a single result produced. In our classification problem, both networks are created in such a way that they output probabilities, per-class for every known class in the dataset. So the output of both networks is a one-dimensional vector of length \( N \) where \( N = number of classes in the dataset \). These two vectors of probabilities need to be equally considered and joined so our joint model can make a prediction/decision.
+
 \subsection{Addition}
+
+The simplest way to join these two vectors, and in that way to join the two models: the negative and the positive one, is to use addition. To use addition we would sum the probabilities per-class. So the probability for the first class as an example would be \( p(c0) = p_p(c0) + p_n(c0) \), where \( p(c0) \) is the probability of the first class (we use zero indexing) and the \(p_p(c0)\) and \(p_n(c0)\) represent the probabilities from positive and negative networks respectably. We would do this operation for all the classes which in turn means that we are simply using element-wise addition of the both probability vectors as the output of the synergy net. This approach is currently used in the models we display here.
+
+Several upgrades to this process are possible.
+
+One upgrade would be to use a hyperparameter \( \omega = \) "importance of negative network"  which would control how both probabilities are taken into count when doing addition. With this parameter we can control the importance of both models, which could be useful in some scenarios where one network heavily outperforms the other one. If we are using this parameter the addition formula we mentioned before would be slightly different, in that the probabilities output from the negative network would be multiplied with the hyperparameter value: \( p(c0) = p_p(c0) + p_n(c0) * \omega \)
+
+Another upgrade would be to divide the resulting probabilities with a number of networks from which they are sourced. This is not necessary if we are doing addition at the end of the model, since it is very likely that an \( argmax \) operation would be used for a final predictions. If however we need the final probabilities or they have to be used further in the model pipeline we would need to perform this normalization process: \( p(c0) = (p_p(c0) + p_n(c0)) / 2 \).
+
 \subsection{Multiplication}
+
+It is also possible, in a similar fashion to use multiplication instead of addition. It is clear that in this case the multiplication of the probabilities would bring higher confidence in the resulting model, without regard to accuracy. For example, if both networks output high probability for one class, its resulting probability would be exponential. And if models are in disagreement (one outputs high probability, other low) the resulting probability would be low. This means that the resulting probabilities would be high only if both models agree. We will experiment with multiplication, further down in the document.
+
 \subsection{Fully-connected blocks}
 
+Both addition and multiplication bring linearity to our model joining. But it is also possible to model the architecture in a way where we have non-linearity's. The easiest way to accomplish this is to use one or more fully connected layer neural network before the final output of the model. This neural network model would consider (as its input) both the probabilities of the positive and negative models and would output the final probabilities. If we are to model the architecture in this way, we can then allow our model to learn specific information about both our models and their performance. One example would be that we can learn in what cases one model performs better than the other and what model to prioritize. Another possibility is to also give the final neural network model insight into the input data which both networks processed. Then, this model would be able to learn what model performs better in which case.
+
+\subsection{Neural Network Fusion in multi-modal systems}
+
+% pricati o fusion u multi modal sistemima, yutub video
+% todo
+
 \chapter{Experimental hypothesis}
+
+In our work we already tested and empirically proved that our way of feature representation is suitable for training neural network models without any loss in accuracy. Moreover, we tested our models in one difficult scenario where algorithm robustness is important (object occlusion/partial inputs) and observed significant increase in accuracy. On the MNIST \cite{lecun1998mnist}, EMNIST \cite{cohen2017emnist} and our newly introduced PMNIST (partial MNIST) datasets of grayscale images of handwritten letters and digits we saw overall improvements in accuracy with some test cases having large increases e.g. \( 12.20\% \) increase in accuracy on the vertically cut (50\% image missing) PMNIST validation set. 
+
+The intuition behind our solution is that by training the classifier to classify on negative (missing, low impact) features we obtain a more robust model in scenarios where some input features are missing. This makes our models suitable for tasks where some sort of an input mask is present e.g. occlusion, corrupt inputs.
+
 \section{The need for ensemble "synergy" models}
-\section{Observing probabilities of normal and negative models}
+
+Upon inspecting our negative models we discovered an interesting property that led us to this new synergy model. When comparing the accuracies of normal and negative models of same architecture, trained in the same way with same hyperparameters, we saw similar accuracies when testing on unmodified test sets. This is expected, as both models converge quickly. In testing with partial inputs, even though we gained some accuracy (in some cases more than \(10\%\)), by inspecting which samples were correctly classified, we discovered that our new network was wrongly classifying some instances which were correctly classified by the unmodified network. Therefore, we have discovered that while our new models are overall more accurate, the accuracy gain is not absolute.
+
+\section{Model description}
+\label{model}
+
+In our previous work \cite{milovsevic2019classification} we showed that by using a simple activation function modification between feature extracting part of a CNN (convolutional layers) and classification (fully-connected) layers we can change the training process so the model uses missing (low-impact) features for classification. The main idea and goal of our method is to invert the feature extraction part of the network so that we obtain what features are missing (or not of high importance) on an input sample. Feature set is a finite set of features limited by the network architecture. In most neural network models, the number of features can be calculated from the number of convolutional layers in the network and their parameters: filter (kernel) size, number of filters, pooling characteristics (stride, type, width and height to consider), convolutional characteristics (e.g. padding type) etc. Most importantly, the output of the feature extractor is the place where we modify the signal before it is propagated to the classifying part of the neural network. As we mentioned earlier, this is very similar to negating the convolutional filter, but easier to implement because we do not have to modify the convolutional layers of existing networks.
+
+To overcome the loss of knowledge we discovered, we create an ensemble model of two networks, one traditional and one negative. Both networks have the same architecture and share the convolutional, feature extraction layers. As we discussed in previous parts, we want to use the convolutional layers from the traditional model, so that we know it is our modification of the learning process that leads us to accuracy gains. This required some effort to make sure that our training process is deterministic and also that some of the weights are shared between models. To clarify, the shared parameters between the models are the frozen convolutional layers obtained from an unmodified neural network. The usage of negative models without shared parameters has also been tested, but it is incomparable to the unmodified models because the convolutional layers (namely filter weights) are completely different. Since we want to focus on models that use classification based on negative features, we want to make sure that the feature extraction parts of the networks remain unchanged in all the testing scenarios.
+
+A simplified architecture diagram can be seen in Figure 1. The convolutional layers are shared while there are two sets of classification layers we are training. On the left, a normal unmodified set of layers is trained while on the right we have a feature negation operation before the fully connected layers. We refer to the left side of the network as the positive side and the right side of the network as the negative side. The negation of the feature embedding vector is explained in Section \ref{negation}.
+
+% For one-column wide figures use
+\begin{figure}
+\centering
+% Use the relevant command to insert your figure file.
+% For example, with the graphicx package use
+  \includegraphics[width=0.4\textwidth]{figures/fig1.pdf}
+% figure caption is below the figure
+\caption{Synergy Model Architecture}
+\label{fig:1}       % Give a unique label
+\end{figure}
 
 \chapter{Implementation}
 
-\section{Classic Synergy}
-\section{Trained Synergy}
-\section{Influence of multiple-phase training in synergy networks}
+In this chapter we describe how to implement the synergy network, and what types of synergy networks we have experimented so far.
+
+\section{Model architecture}
+\label{modelarch}
+
+To carry out our experiments we decided to use a well known and widely used neural network model. Even though our approach is viable for any convolutional neural network (or any model with a feature extraction part) we decided to test on a moderately complex neural network model from the PyTorch model library \cite{paszke2017automatic,paszke2017pytorch}. This model is well documented and known to work well with the CIFAR-10 dataset. The model is also fast to train which was useful in our testing. 
+
+The used neural network model consists of five layers:
+
+\begin{enumerate}
+    \item 1st Convolutional Layer (\emph{conv1}), 3 input channels, 6 output channels, kernel size 5 x 5, 2D max pooling (\emph{maxpool}, kernel size 2 x 2, stride of 2)
+    \item 2nd Convolutional Layer (\emph{conv2}), 6 input channels, 16 output channels, kernel size 5 x 5, 2D max pooling (\emph{maxpool}, kernel size 2 x 2, stride of 2)
+    \item 1st Fully Connected Layer (\emph{fc1}), 400 input features, 120 output features (neurons)
+    \item 2nd Fully Connected Layer (\emph{fc2}), 120 input features, 84 output features (neurons)
+    \item Output Layer (\emph{fc3}), 84 input features, 10 output features (neurons)
+\end{enumerate}
+
+The forward pass through the network of the input sample (\emph{x}) can then be represented as seen in Equations \ref{eq:1} and \ref{eq:2}. ReLU activation function has been omitted from the equations for brevity. The ReLU activation function is used for fully-connected layers (\emph{fc1}, \emph{fc2}) and the convolutional layers (\emph{conv1}, \emph{conv2}).
+
+\begin{equation}\label{eq:1}
+conv(x) = maxpool(conv2(maxpool(conv1(x))))
+\end{equation}
+
+\begin{equation}\label{eq:2}
+Fn(x) = softmax(fc3(fc2(fc1(conv(x)))))
+\end{equation}
+
+The hyperparameters were also defined and are as follows:
+
+\begin{itemize}
+    \item Loss function used is Cross Entropy Loss, suitable for problems of multi-class classification
+    \item Optimizer used is Stochastic Gradient Descent with learning rate of \(0.001\) and momentum of \(0.9\)
+    \item Batch size is \(4\)
+    \item Number of epochs is \(10\)
+\end{itemize}
+
+We are aware that there are more performant, complex, deeper (and wider) models that can be used for this task, however we wanted to experiment with a model that we know can be improved and to do so without introducing more depth or width to the model. Our modifications to this model can be transferred to any CNN model, but this model was sufficient for our experiments because we want to show how to upgrade an existing model, without modifying its architecture. Later, we will also present results with modification of widely known ResNet18 \cite{he2016deep} model.
+
+\subsection{Negating the features}
+\label{negation}
+
+In the negative network we use negation or inversion of the output of the feature-extracting convolutional layers. The process of obtaining the negative features depends on the output of the last convolutional layer in the convolutional blocks. Namely, it is very important which activation function is used in this last layer so we know what range of values we can expect as the output. We are using ReLU activation function throughout the convolutional layers of our models and the outputs are strictly positive values. Therefore we can calculate what features are missing (negative features) as they have very low, close to zero values. 
+
+It is important to note that the negation function can also be applied to the convolutional kernel directly. % TODO
+However, in our approach we found it easier to apply the negation after the activation function since it is easier to work with only positive, scaled values. When ReLU activation function is applied, we can think of the output as the actual feature-positional vector where present features have high values and all the other features have values close to zero. It is yet to be determined if this approach is somehow different to our approach and if it can help with performance.
+
+For our negative model, we have experimented with different negation functions \cite{milovsevic2019classification}, but have found that \( f(x) = 1 - x \) works best. When this function is applied to the squashed output feature vector, we obtain a new vector where negative features have values close to \(1\) and the present features have values either close to \(0\) or negative values. Either way, when these values are propagated through the following layers which also use ReLU activations, only the low impact (negative) features will be considered as they will have values close to one. It is important to note that the convolutional layers almost never output binary outputs with regards to whether a feature is missing or present. This is a shortcoming we hope to address in the future with further research regarding the negation process. When negation function is active, the forward pass through the network changes slightly compared to the normal network as can be seen in the Equation \ref{eq:3}. We emphasize that the convolutional part of the network is trained and reused from the normal network as can be seen in Equation \ref{eq:1}. The fully connected layers (\emph{fc1n}, \emph{fc2n}, \emph{fc3n}) are different (do not share weights with previous model).
+
+\begin{equation}\label{eq:3}
+Fneg(x) = softmax(fc3n(fc2n(fc1n(1 - conv(x)))))
+\end{equation}
 
 \chapter{Testing and Results}
 
-\section{Model definitions}
-\section{Performance of normal and negative models}
-\section{Synergy Performance}
-\subsection{Select Case-by-case analysis of the Synergy network}
-\section{Occlusion Experiments}
-\section{Softmax benefits regarding both networks}
+In this chapter we present the synergy model testing results and provide the finer details of implementation for this model.
+
+\section{Shortcomings of previous model}
+\label{shortcomings}
+
+In this section we further clarify our intentions with the synergy model and the shortcomings of the previously described negative model. Since the traditional (unmodified) model is still useful for some scenarios and shows good performance, we wanted to combine it with our new negative model so the knowledge loss is minimal. 
+
+The conclusion that an improvement is possible came from a simple experiment we performed. After training and testing both models normally, base metrics of accuracy were obtained. As seen in Table \ref{tab:1}, both models perform similarly on the unmodified CIFAR-10 test set with our negative model slightly outperforming the traditional model. This test on the CIFAR-10 dataset also validates our previous results obtained on the MNIST dataset. 
+
+\begin{table}
+\centering
+\caption{Performance of the negative and normal models}
+\label{tab:1}
+\begin{tabular}{lcc}
+\hline\noalign{\smallskip}
+Model & Validation Accuracy & Average Loss  \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal CNN & 63.30 & 1.1513 \\
+Negative CNN & 63.57 & 1.3377 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+The next step in our experiment was to see how many validation samples were correctly classified by both models. We expected that our negative model would correctly classify all the samples that the normal model correctly classified in addition to some new previously wrongly classified examples, but this was not the case. In Table \ref{tab:2} we see that our new model simply learned to classify some other input samples, and while the overall accuracy gain was present, this was not the desired behaviour since we want our model to be an upgrade over a normal model as much as possible. 
+
+\begin{table}
+\centering
+\caption{Performance of the negative and normal models (case counts). CIFAR-10 validation set has 10000 images.}
+\label{tab:2}
+\begin{tabular}{lcc}
+\hline\noalign{\smallskip}
+Case & Occurrences \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal CNN acc. & 6330 \\
+Negative CNN acc. & 6357 \\
+Normal CNN acc. \& Negative CNN inacc. & 1107 \\
+Negative CNN acc. \& Normal CNN inacc. & 1134 \\
+Both accurate & 5223 \\
+Both inaccurate & 2536 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\section{Training processes}
+\label{datasettraining}
+
+The training processes for our model are very similar to our previous experiments with the MNIST dataset. \cite{milovsevic2019classification} The first step in the training process is to train the normal, unmodified network. The training parameters have been described in section \ref{modelarch}. After the training of the normal model we freeze its convolutional layers because they are to be used in other models.
+
+The second network we train is the negative network. The training process is the same as with the normal network apart from that the convolutional layers are already trained and loaded before training. In a way, we are performing fine-tuning of the network with the frozen convolutional layers from the normal network and with the negation operation activated. 
+
+
+
+\subsection{Synergy network}
+\label{synergy}
+
+
+
+After we train the normal network and the negative network, we can join these models into a new model which we call synergy network. Synergy network is an ensemble of two networks of the exact same architectures, where one network is a traditional neural network model and the other one is a negative model. The simplified architecture diagram can be seen in Figure \ref{fig:1}. Both networks are already trained, meaning that creating the synergy network does not require additional training, rather just parameter copying. 
+
+It is important to note how the ensemble of the networks functions -- or how the models are merged. For now, in our experiments we are using a simple addition of the probabilities for each class which are obtained from both neural networks (Equation \ref{eq:6}). The reasoning and the intuition for this is that we believe that there is an issue where the probabilities for the correct class and some incorrect class are very close in either the normal or the negative model outputs. Where we expect an improvement in accuracy is exactly in these cases. In these cases we are hoping that if an input sample yields very high output probability value for some class in one model (either negative or normal) while the other model outputs very close probabilities for two or more output classes, we will then consider the output class that the both models have strong confidence in. The forward pass through the synergy network can be represented with a set of equations (Equations \ref{eq:4}, \ref{eq:5}, and \ref{eq:6}). Please note that the convolutional block (\emph{conv}) is shared between all models and the fully connected layers have the same weights from models seen in Equations \ref{eq:1}, \ref{eq:2}, and \ref{eq:3}.
+
+\begin{equation}\label{eq:4}
+neg(x) = fc3n(fc2n(fc1n(1 - conv(x))))
+\end{equation}
+
+\begin{equation}\label{eq:5}
+normal(x) = fc3(fc2(fc1(conv(x))))
+\end{equation}
+
+\begin{equation}\label{eq:6}
+Fsyn(x) = softmax(neg(x) + normal(x))
+\end{equation}
+
+We have also thought of introducing a hyperparameter (\(\omega\)) giving preference to output of either of the two models. This new parametrized synergy network can be represented as seen in Equation \ref{eq:7} where the negative network influence to the synergy network output is dependant on the hyperparameter value.
+
+\begin{equation}\label{eq:7}
+Fsynp(x) = softmax(neg(x) * \omega + normal(x))
+\end{equation}
+
+In Table \ref{tab:3} we provide an example of some cases, where it is clear to see our intention with the synergy model. For the example (taken from the validation set) where normal network is incorrect and the negative network is correct we can see the output probabilities. The normal network has the highest confidence that the output class is class \(2\) (automobile), but also has relatively high probability for the correct class \(9\) (ship). The negative network has high probabilities for both these classes, but much higher for the correct class \(9\) leading to the synergy network outputting the correct classification result. In Table \ref{tab:4} we can see a similar case where the normal network is correct while the negative network is incorrect. The negative network, although incorrect, still outputs high probability for the correct class, again leading to the synergy network being correct.
+
+The most extreme cases, of which there are \( 78 \) in our experiment, are those in which both networks are incorrect while the synergy network is correct. These cases are the most interesting ones as they represent an absolute increase in performance of our new joint model. In these cases, as seen in Table \ref{tab:5}, we have both networks yielding high probabilities for the correct class but even higher so for some incorrect classes. As both networks are wrong but not confident in their decision, the joint synergy model outputs the correct class.
+
+In Figure \ref{fig:2} the three mentioned input images are shown and they are indeed difficult examples to classify, even to human eye.
+
+It is extremely important to note that there are no cases where either of the networks outputs the correct class and the synergy model outputs the incorrect class meaning that we always have at least one model with correct classification and high confidence -- which is something we hoped to achieve. Also, from the given formulas it is also clear to see that if both networks are correctly classifying the sample, it is impossible for the synergy network to be outputting the wrong class.
+
+
+\begin{table}
+\centering
+\caption{Cases when only one network is correct. Input sample is from the validation set (index \#2). C1 to C10 are output classes probabilities. Correct class is class 9 -- 'ship'. Rows represent three networks: normal CNN, negative CNN, and the synergy network which is the sum of the previous two. Bold is the highest probability, per network.}
+\label{tab:3}
+\tabcolsep=0.04cm
+\begin{tabular}{lrrrrrrrrrr}
+\hline\noalign{\smallskip}
+ & C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 & \textbf{C9} & C10 \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Nor. & 3.05 & \textbf{4.44} & -1.25 & -2.72 & -0.83 & -2.12 & -2.45 & -3.31 & 2.01 & 2.62 \\
+Neg. & 6.04 & 7.29 & -1.39 & 0.11 & -6.85 & -8.49 & -9.60 & -4.89 & \textbf{11.55} & 3.22 \\
+Syn. & 9.09 & 11.73 & -2.65 & -2.60 & -7.68 & -10.61 & -12.05 & -8.21 & \textbf{13.56} & 5.84 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{Another case (\#7396) where normal network is correct whilst the negative network is incorrect. Correct class is class 9 -- 'ship'.}
+\label{tab:4}
+\tabcolsep=0.06cm
+\begin{tabular}{lrrrrrrrrrr}
+\hline\noalign{\smallskip}
+ & C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 & \textbf{C9} & C10 \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Nor. & 2.70 & 3.24 & -2.91 & 0.30 & -2.79 & -1.12 & -1.30 & -3.54 & \textbf{4.71} & 1.70 \\
+Neg. & -1.12 & -0.95 & -2.21 & 2.19 & -1.12 & 0.26 & -1.79 & -1.23 & 1.96 & \textbf{3.16} \\
+Syn. & 1.57 & 2.29 & -5.12 & 2.48 & -3.91 & -0.85 & -3.09 & -4.78 & \textbf{6.67} & 4.87 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{One of the extreme cases (\#6418) where both networks are incorrect and unconfident, but synergy of the models outputs the correct result. Correct class is class 1 -- 'airplane'.}
+\label{tab:5}
+\tabcolsep=0.06cm
+\begin{tabular}{lrrrrrrrrrr}
+\hline\noalign{\smallskip}
+ & \textbf{C1} & C2 & C3 & C4 & C5 & C6 & C7 & C8 & C9 & C10 \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Nor. & 3.52 & \textbf{4.45} & -0.67 & -2.84 & 1.20 & -2.38 & -2.50 & -3.34 & -0.41 & 0.83 \\
+Neg. & 4.00 & 2.63 & -0.31 & -0.16 & \textbf{5.22} & -2.03 & -1.94 & -2.73 & 0.42 & -1.30 \\
+Syn. & \textbf{7.53} & 7.07 & -0.97 & -3.00 & 6.43 & -4.41 & -4.44 & -6.07 & 0.01 & -0.48 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.3\textwidth]{figures/fig2.png}
+\caption{Input examples: \#2 (ship), \#6418 (airplane), \#7396 (ship)}
+\label{fig:2} 
+\end{figure}
+
+\subsection{Other new models}
+\label{other new models}
+
+In our experimentation we are also introducing two additional models, useful for testing our changes. Both models are variations of the main synergy model.
+
+Firstly, we introduce the "trained synergy" model. This is the model of the same architecture as the synergy model described in the previous section, joint of two parts: a traditional convolutional neural network and a negative network of the same architecture (Figure \ref{fig:1}) . The difference comes in the training process. This model is trained in a normal way, without any predefined parameters, for both the convolutional and the fully-connected layers. 
+
+The idea behind this model is to test how parallel training of both parts of the network (normal and negative) will affect the end result. Since both networks are trained at the same time we are using information about both the present (high importance) and negative (missing, low importance) features as can be seen in Equation \ref{eq:6}. The propagated error, in this case, is directly dependent on the sum output of both of the networks. 
+
+Another model we introduce is very similar, with the exception of using the convolutional layers from the normally trained network used for both models in the synergy architecture. We refer to this model as \emph{hot starting} trained synergy model. 
+
+This model has a similar purpose to the previous one: to use both parts of the network during training. The difference here is to reuse the convolutional layers from other models we defined to stop any changes to convolutional kernels while training this way.
+
+In the following section we will discuss more about our findings with both these models.
+
+\section{Results and Discussion}
+\label{results}
+
+In this section we present the full results for all the models trained and tested on the CIFAR-10 dataset. In Table \ref{tab:6} we first present the validation accuracies of all the models. Please note that while the data is split into just training and validation sets, we are not performing any fine-tuning of the parameters based on the validation results. We are simply using the predefined parameters from the PyTorch code repository. This is why we felt that there was no need for a triple (train/validation/test) split of the dataset.
+
+In the column Delta we see the difference between all the models and the normal unmodified neural network. First, we can see that our negative model which uses classification based on negative features outperforms the normal network by a very small margin. This increase in accuracy is not absolute -- we are not just correctly classifying \(0.27\%\) more of validation dataset, rather the correctly classified dataset subset is vastly different. Next model is the synergy network which is the best model we see here. As previously mentioned, the synergy network is not trained but rather a combination of the negative model and the normal model. We see a significant increase in accuracy when using this model on the unmodified validation dataset, and we will later demonstrate how the model performs on partial input data.
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models. Accuracy is given as percentage. Column "Delta" represents the percentage difference between our models and the normal network.}
+\label{tab:6}
+\begin{tabular}{lcr}
+\hline\noalign{\smallskip}
+Model & Accuracy & Delta\\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 63.30 & - \\
+Negative & 63.57 & 0.27 \\
+Synergy & 66.98 & 3.68 \\
+Trained Synergy & 63.32 & 0.02 \\
+Trained Synergy (hot-start) & 64.28 & 0.98 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+Last two models, as described in section \ref{other new models} represent simple tests whether our approach is valid. The trained synergy proved that simply increasing the number of parameters is not enough. Both the trained synergy and the hot starting trained synergy models perform worse than the base synergy model as can be seen in Table \ref{tab:6}. The reason for this, we believe, is that during training the error is calculated and backpropagated on both the normal and negative parts of the network at the same time making it harder to converge. This is especially notable for the trained synergy model where we change a larger number of parameters (convolutional layers). 
+
+Regarding training performance, normal and negative models were comparable in training time (with negative model being faster to train because of the copied frozen convolutional layers) while trained synergy models took longer because of the higher number of parameters to be calculated. The synergy network is not trained, therefore not comparable in training times to others.
+
+\subsection{Testing with more complex models}
+\label{resnet}
+
+In this section we briefly display the results of our approach in training more complex models. The first architecture we tried is the ResNet18 \cite{he2016deep} neural network. First of all, we achieve very similar and comparable results to the one reported in the original paper. The implementation used was from the torchvision \cite{torchvision} library.
+
+In Table \ref{tab:7} we see the results of testing with CIFAR-10 validation set. Even though our new models do not show meaningful increase in accuracy we are still considering this to be a good result because it shows that even in the case of very complex models of neural networks our approach does not negatively impact performance. 
+
+When comparing the synergy model with the trained synergy model it is clear to see that it is not the architecture change that benefits the accuracy but rather our modified training process. 
+
+Further testing with case-by-case analysis similar to what we present in this paper needs to be done in the future. We are looking forward to testing with other highly complex models and expect to find more substantial accuracy gains.
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the ResNet18 based models.}
+\label{tab:7}
+\begin{tabular}{lcr}
+\hline\noalign{\smallskip}
+Model & Accuracy & Delta\\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 92.52 & - \\
+Negative & 92.48 & -0.04 \\
+Synergy & 92.54 & 0.02 \\
+Trained Synergy & 89.47 & -3.05 \\
+Trained Synergy (hot-start) & 92.46 & -0.06 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+Please note that this model is not directly comparable to the main model presented in this paper due to major difference in architecture, hyperparameters, input processing and training characteristics. Full implementation is available at the code repository as described in Section \ref{source}.
+
+\subsection{Testing with partial input samples}
+\label{partial}
+
+Since the main focus of our negative models \cite{milovsevic2019classification} was to increase robustness in the problem of partial input recognition, we also tested with partial inputs and present some initial results here. The tests were done with our synergy model, not with the ResNet18 based one. To test our new models we opted to test with removal of the lower left corner of test images to a certain degree. We have tested with removing up to \( 30\% \) of the input image. One example can be seen in Figure \ref{fig:3}. Even at this initial stage of testing we see very promising results. In Table \ref{tab:8} we can see that our main testing synergy model achieves the highest performance in all three validation sets. Most interesting result is in the C3 dataset with \( 30\% \) of the input image removed. There, our negative model actually performs worse than the normal network but the synergy network has strong increase in accuracy compared to the normal model, proving our initial hypothesis.
+
+We have also tested another scenario, where we removed blocks of pixels from the input image. We created four new validation sets:
+
+\begin{enumerate}
+    \item Single Square Kernel (SSK) - one fixed position square removed
+    \item Single Square Kernel Random (SSKR) - one randomly positioned square removed
+    \item Multiple Square Kernel (MSK) - multiple (3) fixed position squares removed
+    \item Multiple Square Kernel Random (MSKR) - multiple (2) larger randomly positioned squares removed
+\end{enumerate}
+
+The samples from these new validation sets can be seen in Figure \ref{fig:4}. The results of this test are shown in Table \ref{tab:9} where we can see similar behaviour to the previous test where corners of the images have been removed.
+
+Similar to our previous work \cite{milovsevic2019classification}, it is important to note that these partial samples are not used during training, rather just for testing. We are eager to test with other input modifications and models in the future.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{figures/fig3.png}
+\caption{Input example \#8 from CIFAR-10 validation set with various levels of occlusion added. From left to right: original image, \( 10\% \) removed, \( 20\% \) removed, \( 30\% \) removed}
+\label{fig:3} 
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{figures/fig4.png}
+\caption{Input example \#3421 from CIFAR-10 validation set with various modes of box occlusion. From left to right: original image, SSK, SSKR, MSK, MSKR.}
+\label{fig:4} 
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models with testing with datasets with partial samples. C1 to C3 represent dataset with \( 10\% \), \( 20\% \), \( 30\% \) of the input image removed. Best results in bold text.}
+\label{tab:8}
+\tabcolsep=0.06cm
+\begin{tabular}{lcccc}
+\hline\noalign{\smallskip}
+\emph{Model/Dataset} & Unmodified & C1 & C2 & C3 \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 63.30 & 62.95 & 60.93 & 56.33 \\
+Negative & 63.57 & 63.47 & 61.19 & 55.31 \\
+Synergy & \textbf{66.98} & \textbf{66.51} & \textbf{64.33} & \textbf{59.08}\\
+Trained Synergy & 63.32 & 63.22 & 62.29 & 57.29\\
+Trained Synergy (h.s.) & 64.28 & 64.14 & 62.23 & 56.11\\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models with testing with datasets with block removed partial samples. Best results in bold text.}
+\label{tab:9}
+\tabcolsep=0.06cm
+\begin{tabular}{lccccc}
+\hline\noalign{\smallskip}
+\emph{Model/Dataset} & Unmod. & SSK & SSKR & MSK & MSKR \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 63.30 & 54.04 & 56.89 & 61.15 & 47.60 \\
+Negative & 63.57 & 51.27 & 56.15 & 60.38 & 45.08 \\
+Synergy & \textbf{66.98} & \textbf{55.24} & \textbf{59.85} & \textbf{64.49} & \textbf{49.35}\\
+Trained Synergy & 63.32 & 53.89 & 57.45 & 60.66 & 44.85\\
+Trained Synergy (h.s.) & 64.28 & 52.73 & 54.37 & 62.00 & 46.27 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
 \section{Robustness to Adversarial Attacks}
+
+% TODO
+
+\section{Summary and Future Work}
+\label{summary}
+
+In this part we discussed our discovery of some shortcomings of our classification based on missing features approach. Firstly, we validated our previous results on the more complex CIFAR-10 dataset and then experimented with introducing an ensemble synergy model of the traditional CNN and our negative CNN to further boost performance. In our experiments we have showed that there is definitely a possibility for more accurate models when using this approach. We have also shown where the increase in performance comes from -- the cases where one network is uncertain and the other is highly confident. In our initial testing with partial input data we also show that our modifications (that can be applied to any convolutional neural network) lead to notable accuracy gains in these cases without any major architectural changes.
+
+While these models have only been tested on the unmodified CIFAR-10 validation set and the corner cut validation sets for now, our goal is to repeat our experiments for various types of occlusion in images. Another area where it is possible to improve is combination of the two models inside the synergy model. As previously described, we are only experimenting with simple probability summation although other approaches are definitely possible. We will also experiment with other ways of joining the networks, one being to add one or more fully connected layers which are given the outputs of the two networks as inputs. The \emph{trained synergy} models are also to be further examined. It is possible that with some parameter optimization, accuracy can be improved.
+
+We have also considered combining our models with newer neural architecture search \cite{elsken2018neural} and genetic algorithm methods \cite{assunccao2019fast} to try and discover more models that can benefit from our changes.
+
+Additionally, we want to experiment with more state of the art (e.g. \cite{he2016deep,huang2017densely,xie2017aggregated}) models which achieve very high accuracy on the CIFAR-10 and ImageNet \cite{deng2009imagenet} datasets. While our work in this paper focused on a simpler and easier to train model, we believe that the modifications described in this paper can also further improve even the most complex models of today. We are also eager to try our approach in regression tasks and we are already familiar with some application that could benefit from this approach \cite{pecev2016system,pecev2017ltr}.
 
 \part{True Negative Deep Learning}
 \chapter{Introduction}
@@ -630,7 +1404,7 @@ Freezing of the convolutional layers (or other parts of a neural network models)
 
 \chapter{Noise Contrastive Estimation Models}
 \section{Negative sampling}
-\section{NCE models for Natural Language Processing}
+\section{NCE models}
 
 \chapter{Other models}
 
@@ -654,8 +1428,17 @@ Freezing of the convolutional layers (or other parts of a neural network models)
 \section{Model performance}
 
 \part{Appendices}
-\chapter{Experiment Reproducibilty and Determinism}
-\chapter{Source code}
+\chapter{Source code and Reproducibility}
+\label{source}
+
+The source code (written with PyTorch library) for our models and the training processes can be found on the following link: 
+
+\begin{footnotesize}
+\url{github.com/nmilosev/phd}
+\end{footnotesize}
+
+We have taken some additional steps with the used libraries and tools so that our results are reproducible and testable in many different environments.
+
 \chapter{Open Source Licences}
 \backmatter
 
@@ -666,7 +1449,7 @@ Freezing of the convolutional layers (or other parts of a neural network models)
 % maybe there are better solutions
 {
   \raggedright
-\printbibliography[heading=bibintoc]
+  \printbibliography[heading=bibintoc]
 }
 
 % --------------------------------
@@ -690,7 +1473,7 @@ Nemanja \cite{novak2010comparison}
   Novi Sad, 2020 \> Nemanja Milošević
 \end{tabbing}
 
-\begin{otherlanguage}{serbian}
+\begin{otherlanguage}{english}
 \chapter{Kratka biografija}
 
 Nemanja
