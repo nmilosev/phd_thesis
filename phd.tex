@@ -15,6 +15,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
+%tikz
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.9}
+
 
 % ovo je iz nnw template:
 \RequirePackage{siunitx}
@@ -740,15 +744,14 @@ In our model there were a total of 800 values (a vector of length 800) which is 
 
 The implementation of the mentioned modification is very simple in PyTorch library. We only need to modify the "forward" function of the neural net Python module to negate the vector at a specific stage. The backwards pass is calculated automatically with autograd \cite{paszke2017automatic}.
 
-\subsection{Negative Convolutional Kernel Experiments}
-% TODO
-\subsection{Influence of multiple-step training}
-% TODO
-\subsection{Negative feature selection process}
-% TODO
-\subsubsection{Detecting relevant features per-class for negation}
 
-% TODO
+
+\subsection{Influence of multiple-step training}
+% TODO dodati ovde dvofaznost
+\subsection{Negative feature selection process}
+% TODO dodati ovde deo oko toga koje su osobine irelevantne kako bi islo
+\subsubsection{Detecting relevant features per-class for negation}
+% TODO 
 
 \section{Training process}
 
@@ -812,7 +815,7 @@ We are aware that a model architecture which would give even better results comp
 
 After testing the models on the mentioned datasets we obtained the following results. First, we present the results on unmodified testing sets.
 
-\begin{table}[h]
+\begin{table}[ht]
   \centering
   % note the S[] column specification provided by the siunitx package
   \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
@@ -834,7 +837,7 @@ As seen in Tab.~\ref{tab:results-unmodified} the modified network models perform
 
 In Tab.~\ref{tab:results-pmnist}, \ref{tab:results-emnistmnist} and \ref{tab:results-emnist} we present the accuracy percentages on the newly introduced validation sets. In Tab.~\ref{tab:results-pmnist} we show the results on the four PMNIST validation sets while in Tab.~\ref{tab:results-emnistmnist} and \ref{tab:results-emnist} we present the result on the four validation sets generated for EMNIST-MNIST and EMNIST-Balanced datasets, respectively.
 
-\begin{table}[h]
+\begin{table}[ht]
   \centering
   % note the S[] column specification provided by the siunitx package
   \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
@@ -853,7 +856,7 @@ In Tab.~\ref{tab:results-pmnist}, \ref{tab:results-emnistmnist} and \ref{tab:res
   \label{tab:results-pmnist}
 \end{table} 
 
-\begin{table}[h]
+\begin{table}[ht]
   \centering
   % note the S[] column specification provided by the siunitx package
   \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
@@ -872,7 +875,7 @@ In Tab.~\ref{tab:results-pmnist}, \ref{tab:results-emnistmnist} and \ref{tab:res
   \label{tab:results-emnistmnist}
 \end{table} 
 
-\begin{table}[h]
+\begin{table}[ht]
   \centering
   % note the S[] column specification provided by the siunitx package
   \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
@@ -891,7 +894,7 @@ In Tab.~\ref{tab:results-pmnist}, \ref{tab:results-emnistmnist} and \ref{tab:res
   \label{tab:results-emnist}
 \end{table} 
 
-\begin{table}[h]
+\begin{table}[ht]
   \centering
   % note the S[] column specification provided by the siunitx package
   \begin{tabular}{rS[table-format=12.1]S[table-format=32.1]S[table-format=42.1]}
@@ -942,16 +945,201 @@ Here we present concisely the summary of experiments with the classification bas
 
 The results show that classification based on missing features is possible and that these new models we introduced help in partial input scenarios. Our approach, albeit much simpler than some other approaches (e.g. training with adversarial examples) can also help with a very difficult real-world problem of having partial inputs to classify in a critical environment. The partial input example is only one of many use cases for our models that we hope to discover.
 
+\subsection{Negative Convolutional Kernel Experiments}
+
+A valid question for our model definition is why not use negation on the convolutional kernel themselves, rather than to use them after the activation function is applied. While certainly possible, there is hardly any difference in trained models performance in our experiments. There are several advantages and disadvantages to this approach.
+
+The greatest advantage is in that to use negative learning we only need to negate (apply \( new\_kernel\_weights = - old\_kernel\_weights \) and \( new\_kernel\_biases = -  old\_kernel\_biases \)) convolutional layers independently of our activation function choice. As we mentioned earlier the negation function needs to take into consideration what is the domain of value which are output from the last convolutional layer and its activation function. If we are negating the kernels directly we can do so without the additional knowledge (and implementation) about the activation function. 
+
+From the implementation standpoint, another benefit is that we do not have branches in our network forward pass as we had before. This allows us to use static computational graphs (e.g. TensorFlow implementation) instead of dynamic graphs (PyTorch) which can lead to increase in training and inference speed.
+
+There are also however several disadvantages. 
+
+First of all, the kernels must be learned before they are negated eliminating several of our newly implemented models. The pure negative (non-hybrid) model cannot be trained consistently with other models in this way since we do not know the kernels and their negation. In other works we need to use negation also during the training of the kernel themselves, which in this scenario is not possible. Another is the alternating hybrid model. As we cannot use branches in our forward (and backward) pass to shift the weight changes from the gradient descent, we cannot train this model. We could perhaps keep a copy of the kernel weights and biases and somehow compute the updates, but it would be very complicated and probably without any benefit to the performance.
+
+We strongly believe that the dynamic, branched approach is better for its flexibility. We are fully in control of the negation process only in this case.
+
+We present here the results for the MNIST and PMNIST datasets (experiments have been conducted for MNIST, PMNIST, EMNIST-Balanced and EMNIST-MNIST datasets, all have similar results to our other experiments, code is available) to show that negation of the kernels does not bring performance in comparison to our "branched" dynamic approach of negating the signal after the activation function of the last convolutional layer. This network is exactly the same architecture as all the other models we describe in this part, the only difference is that the negation of the features is removed from the forward pass definition function and the kernel are negated directly. The kernel negation process takes place after half of the total number of epochs of training (same as with the other models, where we activated the negative branch in the same time point). We present results for the hybrid and hybrid-nr models as they are only ones compatible. We also include the baseline model for easier reading. 
+
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & HN & NR  \\
+    \midrule
+    {Unmodified MNIST} & {99.01} & {98.74} & {98.62} \\
+    {Horizontal cut} & {45.52} & {47.32} & {48.74} \\
+    {Vertical cut} & {60.37} & {58.36} & {60.15}  \\
+    {Diagonal cut} & {56.47} & {60.87} & {57.10} \\
+    {Triple cut} & {41.83} & {41.56} & {46.57} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models using direct kernel negation, on MNIST/PMNIST validation sets.}
+  \label{tab:results-kerneg}
+\end{table} 
+
+In Table \ref{tab:results-kerneg} we can see that we obtained very similar results to our other experiments, leading us to believe that it is up to the researcher to choose what implementation is better to use in which scenario taking into count the advantages and disadvantages of both methods we propose here.
+
+\subsection{Other activation functions}
+
+So far we have shown how to negate the ReLU function and how it is possible to use negative learning concepts when using this function. It is of course possible to use other activation functions as we will show in this subsection. For our tests we originally chose the ReLU activation function as it is today's most popular and performant choice in modern neural network architectures.
+
+In this subsection we display results of our experiments with three additional activation functions: \( sigmoid \), \( tanh \) and \( ReLU6 \). \( Sigmoid \) activation function was one of the first non-linear activation function used for artificial neural networks. As it outputs values in the range from \( 0 \) to \( 1 \) our negation formula \( f(x) = 1 - x \) can be used without further modifications. For the \( tanh \) activation function the negation function had to be modified slightly as the \( tanh \) function outputs values in the range from \( -1 \) to \( 1 \). It is therefore necessary to use a different negation function: \( f(x) = -x \). Lastly for the \( ReLU6 \) activation function, a modification of the \( ReLU \) activation function with a hard ceiling at the value \( 6 \) we used \( f(x) = 6 - x \).
+
+All the results displayed in the following tables show that it is possible to use negative learning concepts we mention here with different activation functions on the MNIST dataset with this model. As for performance, it is also clear that there are again benefits, especially in the case of partial inputs. It is important to note however that these results are not directly comparable with the results we showed for the \( ReLU \) model. Activation function choice is an important architecture change, therefore the models become incomparable. 
+
+Presented results are for the MNIST/PMNIST dataset. Experiments have been performed also on the EMNIST-MNIST and EMNIST-Balanced datasets with similar findings. Full results are available in the source code repository of the thesis.
+
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {MNIST} & {93.07} & {93.39} & {94.42} & {94.39} & {91.03} \\
+    {Horizontal cut} & {32.62} & {33.64} & {33.75} & {33.94} & {36.36} \\
+    {Vertical cut} & {35.28} & {33.99} & {39.50} & {38.65} & {38.76} \\
+    {Diagonal cut} & {54.44} & {54.68} & {55.49} & {57.94} & {49.79} \\
+    {Triple cut} & {43.67} & {44.17} & {45.49} & {53.86} & {40.20} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( sigmoid \) activation function}
+  \label{tab:results-sigmoid}
+\end{table} 
+
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {MNIST} & {98.85} & {98.84} & {98.84} & {98.88} & {97.54} \\
+    {Horizontal cut} & {41.58} & {38.46} & {41.98} & {40.21} & {45.34} \\
+    {Vertical cut} & {43.91} & {43.68} & {48.84} & {52.35} & {47.30} \\
+    {Diagonal cut} & {54.11} & {54.74} & {54.50} & {57.81} & {63.46} \\
+    {Triple cut} & {40.52} & {38.31} & {42.78} & {43.66} & {47.46} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( tanh \) activation function}
+  \label{tab:results-tanh}
+\end{table} 
+
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {MNIST} & {99.02} & {10.32} & {98.94} & {97.61} & {9.58} \\
+    {Horizontal cut} & {41.37} & {10.32} & {44.57} & {31.30} & {9.58} \\
+    {Vertical cut} & {57.17} & {10.32} & {57.33} & {63.42} & {9.58} \\
+    {Diagonal cut} & {55.68} & {10.32} & {62.15} & {59.87} & {9.58} \\
+    {Triple cut} & {40.65} & {10.32} & {42.57} & {41.76} & {9.58} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( ReLU6 \) activation function}
+  \label{tab:results-relu6}
+\end{table} 
+
+From the tables shown here we can see that in all cases there is at least one variation of a negative model outperforming the traditional model, proving our hypothesis.
+
+For the \( ReLU6 \) experiments we can see that some models are unable to converge, the only negative model and the alternating model. We strongly believe that is because of our negation function. This outlier proved very important as we understood our negation function more accurately. It is very important to negate the ReLU (and possibly other activation functions) in a way that there are negative values (for negative features) in the new output vector. These values when propagated further through the network will be annulled naturally through other ReLU activations. We assume this is important for our model, to learn what features need to ignored in a way. To validate this assumption, we made a similar experiment using a different negation function for the \( ReLU6 \) activation function:  \( f(x) = 3 - x \). This will allow the strongly positive, present features to have values less than 0 in the output vector.
+
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {MNIST} & {99.02} & {98.92} & {99.04} & {99.14} & {99.04} \\
+    {Horizontal cut} & {41.37} & {45.75} & {44.28} & {45.52} & {52.69} \\
+    {Vertical cut} & {57.17} & {58.70} & {55.61} & {65.31} & {61.85} \\
+    {Diagonal cut} & {55.68} & {62.23} & {59.24} & {58.53} & {60.77} \\
+    {Triple cut} & {40.65} & {42.26} & {39.82} & {44.91} & {43.63} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( ReLU6 \) activation function and the \( f(x) = 3 - x \) negation function.}
+  \label{tab:results-relu6new}
+\end{table} 
+
+As can be seen in the table, the results suggest that our hypothesis is correct, some form of less than zero values when using rectified linear units (ReLU) is needed. This idea will be examined in more detail in the future research.
+
+Another example where this can be seen is if \( LeakyReLU \) activation function is used. \( LeakyReLU \) function is very similar to \( ReLU \) function but it allows some of the negative values to "leak through" whereas \( ReLU \) cuts off all negative values. \( LeakyReLU \) can be defined as \( LeakyReLU(x) = max(0,x) + negative\_slope * min(0,x) \) where \( negative\_slope \) is a variable factor which dictates how much leaking of the close-to-zero values is allowed. With this activation function it is extremely important to allow for some negative values to pass through as we mentioned before for the \( ReLU6 \) activation function. This function is also tested and can be used for negative learning with the same negation as \( ReLU \), the results for MNIST/PMNIST validation are in the following table.
+
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {MNIST} & {98.96} & {98.97} & {99.12} & {99.21} & {99.06} \\
+    {Horizontal cut} & {42.57} & {53.36} & {49.05} & {51.53} & {47.96} \\
+    {Vertical cut} & {60.32} & {65.43} & {61.17} & {69.80} & {63.84} \\
+    {Diagonal cut} & {54.16} & {61.20} & {59.97} & {57.98} & {60.69} \\
+    {Triple cut} & {41.19} & {40.07} & {38.89} & {42.52} & {43.76} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( LeakyReLU \) activation function (\( negative\_slope = 0.1\)) and the \( f(x) = 1 - x \) negation function.}
+  \label{tab:results-leakyrelu}
+\end{table} 
+
 \subsection{Corner occlusions}
 
-% TODO
+In addition to our previous experiments with removing parts of the image we decided to experiment with one more special case of image occlusion -- corner occlusion. This type of occlusion is very common in modern images and it simply means that one triangular part of the image (in our case bottom left corner) is removed, or behind another object. An example on the CIFAR-10 dataset can be seen in Figure \ref{fig:cbomf3}.
 
-\subsection{Image Perturbation Experiments}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{figures/fig3.png}
+\caption{Input example \#8 from CIFAR-10 validation set with various levels of occlusion added. From left to right: original image, \( 10\% \) removed, \( 20\% \) removed, \( 30\% \) removed}
+\label{fig:cbomf3} 
+\end{figure}
 
-% TODO 
-\subsection{Differences in activation functions}
+We carried out all the experiments as before but with these new validation datasets. The experiments were done with varying number of pixels removed from 10\% of the image to 50\% of the image. The results can be seen in the following table.
 
-% TODO
+\begin{table}[ht]
+  \centering
+  % note the S[] column specification provided by the siunitx package
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {Occlusion, 10\%} & {98.97} & {98.97} & {99.09} & \textbf{{99.19}} & {99.09} \\
+    {Occlusion, 20\%} & {98.97} & {98.98} & {99.09} & \textbf{{99.17}} & {99.09} \\
+    {Occlusion, 30\%} & {98.62} & {98.53} & {98.89} & \textbf{{98.90}} & {98.81} \\
+    {Occlusion, 40\%} & {79.27} & {77.88} & {79.69} & \textbf{{81.01}} & {80.26} \\
+    {Occlusion, 50\%} & {36.55} & {45.53} & {41.76} & \textbf{{49.35}} & {43.64} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on the new corner occlusion validation sets. Bold are the best models per dataset. Hybrid no-reset network performs best here.}
+  \label{tab:results-corner}
+\end{table} 
+
+We can see that the accuracy slowly decreases as we remove more image data, as expected. We can also confirm that our models are more robust in comparison with the normal baseline neural network in all the cases of corner occlusion, in some cases (e.g. 50\% occlusion) even by as much as 12.8 \%, a great result. We can also see that the MNIST dataset has high quality as all images are centered and roughly the same size. Even with 30\% of the corner data removed most of the relevant data remains in the image.
+
+Test have been performed on other datasets we mention here (EMNIST-MNIST, EMNIST), with similar results. Full results can be found in the code repository.
+
+Other occlusion variants (e.g. top-right or other corners) remain to be tested. 
+
 \section{Robustness to Adversarial Attacks}
 
 A topic which should be mentioned here is adversarial attacks on neural networks research \cite{bastani2016measuring}. 
@@ -962,7 +1150,110 @@ In \cite{globerson2006nightmare} the MNIST \cite{lecun1998mnist} dataset used in
 
 \cite{szegedy2013intriguing} and \cite{goodfellowexplaining} described also on the MNIST dataset different modifications to the input image which affect the model greatly. In \cite{szegedy2013intriguing} MNIST dataset was used to investigate how different elements in input images maximize some network activations. The second part of the paper describes an adversarial attack on the network using previously gathered information. Our paper differs from this paper in that we are investigating how missing features are affecting classification instead of what features affect it the most, and that we are also using a convolutional neural network, while in this paper a traditional multi-layer fully connected network is used. Also in the mentioned paper, authors suggest that training with a mixture of adversarial and clean examples is a way to achieve better performance. In our case, we did not want to train on our generated adversarial (partial) examples, as will be explained later. Similarly in \cite{goodfellowexplaining} adversarial examples are being used to increase neural network robustness, but they are being used during training. 
 
-% TODO
+\subsection{White-box attacks (Fast Gradient Sign Method attack on the negative models)}
+
+To evaluate our model robustness with regard to adversarial attack we first experimented with the most-popular white-box method: Fast Gradient Sign Method (FGSM). This white-box attack uses gradient information from the forward pass of the model in combination with gradient ascent to maximize the loss function we normally use for training. This method step is very similar to training the model apart from that the model is in evaluation mode (locked weights) and gradient ascent is used to modify the input image. That modified input image becomes an adversarial example. The adversarial image is often indistinguishable (to humans) from the original image but wrongly classified by the model. One example can be seen in the Figure. 
+
+% For one-column wide figures use
+\begin{figure}
+\centering
+% Use the relevant command to insert your figure file.
+% For example, with the graphicx package use
+  \includegraphics[width=1\textwidth]{figures/fgsm_panda_image.png}
+% figure caption is below the figure
+\caption{FGSM adversarial image generation process, \( \epsilon = 0.007 \) (image taken from original FGSM paper)}
+\label{fig:fgsmpanda}       % Give a unique label
+\end{figure}
+
+It is important to say that FGSM model is a adversarial attach whose purpose is a simple general misclassification method rather than a targeted method whose purpose would be to specifically make the model select a wrong targeted class.
+
+FGSM is easy to implement, reference implementation from the PyTorch documentation was used for these experiments. FGSM only has one hyper-parameter: \( \epsilon \) which controls the multiplication factor of the gradient noise added to the input image. It is very similar to learning rate in gradient descent when using normal training techniques.
+
+The results of the experiment with various \( \epsilon \) values can be seen in Table \ref{tab:results-fgsm} and Figure \ref{fig:fgsm_chart}. We can see that for every \( \epsilon \) value most of the negative models outperform the traditional model of the same architecture meaning that the negative models presented here are more resilient to FGSM white box adversarial attack, a result we were hoping for.
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{\(\epsilon\)/Model} & SN & ONN & HN & NR & ALT \\
+    \midrule
+    {(control) 0.0} & {98.79} & {98.78} & {98.92} & {\textbf{98.98}} & {98.92} \\
+    {0.05} & {93.70} & {94.42} & {94.99} & {\textbf{95.07}} & {94.61} \\
+    {0.1} & {77.34} & {80.09} & {80.88} & {81.35} & {\textbf{81.96}} \\
+    {0.15} & {47.23} & {52.51} & {49.80} & {53.07} & {\textbf{55.65}} \\
+    {0.2} & {20.39} & {23.99} & {20.41} & {24.72} & {\textbf{25.95}} \\
+    {0.25} & {6.77} & {8.26} & {6.35} & {\textbf{8.99}} & {8.44} \\
+    {0.3} & {2.71} & {2.65} & {2.15} & {\textbf{3.31}} & {2.40} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Results with accuracy for all models against FGSM white-box attacks. Bold are the best models per adversarial dataset. Please note that the control results are slightly different than before as normalization of the dataset has been omitted as suggested by the authors of the FGSM attack. Best models in bold.}
+  \label{tab:results-fgsm}
+\end{table} 
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \label{chart:fgsm}
+    \begin{axis}[
+        xlabel={\(\epsilon\) - FGSM attack modifier},
+        ylabel={Accuracy on the adversarial testset},
+        xmin=0, xmax=0.3,
+        ymin=0, ymax=100,
+        xtick={0,0.05,0.1,0.15,0.2,0.25,0.3},
+        ytick={0,10,20,30,40,50,60,70,80,90,100},
+        legend pos=north east,
+        ymajorgrids=true,
+        grid style=dashed,
+        xticklabels={0,0.05,0.1,0.15,0.2,0.25,0.3}
+    ]
+    
+    \addplot[
+        color=blue,
+        mark=square,
+        ]
+        coordinates {
+        (0,98.79)(0.05,93.70)(0.1,77.34)(0.15,47.23)(0.2,20.39)(0.25,6.77)(0.3,2.71)
+        };
+        \addlegendentry{normal model}
+        
+    \addplot[
+        color=red,
+        mark=Mercedes star, % lewis hamilton bre
+        ]
+        coordinates {
+        (0,98.98)(0.05,95.07)(0.1,81.96)(0.15,55.65)(0.2,25.95)(0.25,8.99)(0.3,3.31)
+        };
+        \addlegendentry{negative model}
+        
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Accuracy of normal and negative (best chosen) models against FGSM}
+    \label{fig:fgsm_chart}
+\end{figure}
+
+\subsection{Black-box attacks: Black box Projected Gradient Descent attack on the negative models}
+
+In contrast to the white-box adversarial attacks black-box attacks do not have direct access to the attacked network parameters. Instead they use different data to learn how to manipulate data in a way so that it is misclasified. One common way to use black-box attacks is to use a donor neural network (sometimes called a Holdout network) which the attacking algorithm studies and tries to figure out ways to manipulate it. Then this adversarial data generated based on the Holdout network is used in adversarial attacks on other networks. One algorithm that can be used in both white-box and black-box scenarios is the Projected Gradient Descent (PGD) adversarial attack. It is normally used as a black-box algorithm with Holdout and Target networks but it can also be used as a white-box algorithm if both networks are the same. PGD attack is very similar to the previously used FGSM attack as it uses gradients from the Holdout network to try and maximize the loss function and in that way create adversarial examples which are wrongly classified. The difference between PGD and FGSM is that PGD limits the size of the perturbation (e.g. number of pixels) to keep the changes local and direct while the FGSM changes the entire input sample. The advantage of changing only local parts of the image is that it is more likely that humans will still be able to classify the input image correctly as only one part of it is changed. Another benefit of this approach is in generative models where we can actually deduce what are the differences in input data between specific class. For example if we have dataset of images of animals, PGD will be able to learn that if a beak is added the image will be classified as an image of a bird. If used in this way, PGD can provide us with the most important features of a class in dataset.
+
+We experimented with black-box PGD attack where we gave it all of our five models for experimentation (one normal, four negative) as a Holdout model. Then with the adversarial examples generated, we compare all the accuracies on the adversarial testing datasets, results and comments in Table \ref{tab:results-pgd}.
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{l|ccccc|c}
+    \toprule
+     \textit{Holdout/Target} & SN & ONN & HN & NR & ALT & {Avg. acc.} \\
+    \midrule
+     SN & \textit{{29.28}} & {54.86} & {52.67} & {57.80} & {60.95} & {56.57} \\
+     ONN & {52.62} & \textit{{33.33}} & {56.14} & {58.05} & {62.38} & {57.29} \\
+     HN & {48.58} & {53.83} & \textit{{31.68}} & {56.74} & {56.61} & {53.94} \\
+     NR &{51.31} & {53.62} & {54.75} & \textit{{35.81}} & {59.27} & {54.73}\\ 
+     ALT & {50.56} & {54.38} & {51.01} & {55.22} & \textit{{37.70}} & {52.79}\\
+     % todo dodati avg dole
+    \bottomrule
+  \end{tabular}
+  \caption{Results with accuracy for all models against PGD black-box attack. On the diagonal in italic font are the actual PGD white-box attack accuracies (same Holdout and Target model). We can see more severe damage caused by PGD in these cases. These results are taken for the middle epsilon value: \(\epsilon = 0.15 \). In the last column we can see the average accuracy for models when using PGD as a black-box attack (accuracy for the white-box attack omitted) where the negative network performs best. The results are better for greater \(\epsilon\) values. Full results are available in the code repository.}
+  \label{tab:results-pgd}
+\end{table} 
 
 \part{Synergy of Traditional and Classification Based On Missing Features}
 
@@ -1376,9 +1667,10 @@ Trained Synergy (h.s.) & 64.28 & 52.73 & 54.37 & 62.00 & 46.27 \\
 \end{tabular}
 \end{table}
 
-\section{Robustness to Adversarial Attacks}
+\section{Synergy Robustness to Adversarial Attacks}
 
-% TODO
+\subsection{White-box attacks: Fast Gradient Sign Method attack on the synergy models}
+\subsection{Black-box attacks: Black box Projected Gradient Descent attack on the synergy models}
 
 \section{Summary and Future Work}
 \label{summary}
@@ -1392,18 +1684,61 @@ We have also considered combining our models with newer neural architecture sear
 Additionally, we want to experiment with more state of the art (e.g. \cite{he2016deep,huang2017densely,xie2017aggregated}) models which achieve very high accuracy on the CIFAR-10 and ImageNet \cite{deng2009imagenet} datasets. While our work in this paper focused on a simpler and easier to train model, we believe that the modifications described in this paper can also further improve even the most complex models of today. We are also eager to try our approach in regression tasks and we are already familiar with some application that could benefit from this approach \cite{pecev2016system,pecev2017ltr}.
 
 \part{True Negative Deep Learning}
-\chapter{Introduction}
-\section{Goals and Motivation}
-\section{Problem definition}
 
-\section{Defining "True" Negative Deep Learning models}
+In previous parts of this dissertation we described and focused on some specific models of negative learning which use special feature representations in order to deduce the output class in classification tasks. In this part we will discuss potential and existing implementations of "true negative learning". With the term true negative learning we consider models which do not use special feature representation but rather modified data and/or training process to implement negative learning. In other words these model learn by recognizing patterns in the form of what is not the output class based on the input data, where our models used unmodified input data for a similar purpose. There exist several models which implement similar patterns and we will discuss them in this part of the manuscript.
+
+\chapter{Goals, motivation and implementations}
+
+Goals of the true negative deep learning model is similar to the models we have already seen. To learn additional information about the data based on negative patterns in the data which can be missing information or the actual negative labels (e.g. what something is not in classification tasks). This way of learning can be implemented in several ways and there are already several models which use something similar. In this chapter we will mention two groups of true negative deep learning models. The first group is the models which work by modifying the dataset (negative sampling) and the second group is the models which are using other techniques (e.g. loss function modifications).
+
+\section{Negative sampling}
+
+In this section we describe negative sampling as a form of negative deep learning knowledge. Negative sampling is a process of transforming a dataset in a way to generate negative or wrong examples. In m-class classification problems this can be done in several ways. The simplest way to generate negative samples is to use the following process: for every sample in a dataset choose a random label which is not equal to its actual label. This process can be repeated many times to generate even more negative data. This data at first may seem to be not important, but for negative models it represents viable and important knowledge. Another way to use negative sampling is to choose a specific negative class for a sample we are observing. This can be useful in some scenarios, for example to overcome bad performance on two (or more) specific classes which are often very similar in classification. Problem with this approach is that it often requires manual labeling.
+
+In the second case, manual labeling can be avoided if we use several models for training. For example, we train one model and observe its results on a subset of data from the validation set. In these results we can notice some classes in the confusion matrix where the model is often confused in classification. Then we can use that information to generate negative samples for our second negative model which will use this additional knowledge of "problematic" classes in our dataset and hopefully overcome them.
+
+\section{Noisy Label Classification}
+
+Where negative learning models showed promise is in the problem of noisy label classification. Having dataset with clean labels is very rare in real world scenarios, and even datasets which are used commonly for neural network training (e.g. MNIST, CIFAR) have wrongly classified samples in them. These samples we called noisy samples or samples with noisy labels.
+
+During production of this dissertation, a lab from South Korea is also experimenting with negative models for tasks of noisy label classification. In the paper they use Negative learning models (with random negative sampling as described above) to train models more robust to noisy labels. In the paper CNNs are trained using a complementary, synthetic label as in "input image does not belong to this complementary label". The main premise is that for noisy label classification negative samples provide wrong information much less frequently than normal unmodified data. This prevents the network from overfitting or m
+
+Their approach has some, albeit small similarities to the methods presented in this dissertation. First of all, the models described in the paper only concern robustness to noisy labels not general robustness of the model to input modifications or adversarial attacks as we experimented. They also use negative sampling to generate negative samples for training and a simple modification to the loss function where the softmax output of the network is inverted (all classes have probability value 1 apart from the actual class which has a value of 0). They also experiment with a combination of positive and negative learning models (with somewhat similar goals like our synergy network) to overcome bad performance on cleaner datasets without noisy labels where normal, positive models outperform negative models. This method can be used also for data filtering so that noisy labeled data can be removed from the dataset used later on.
+
+In the paper it is demonstrated that the introduced negative models and negative sampling in general can help in creating models more robust to noise in the label data, both artificially added and the actual noise in the datasets, another use case for the negative models related to robustness.
+
+It is very possible that the models introduced in this paper could also be useful for classification of partial or adversarial examples but this remains to be tested at a future time.
 
 \chapter{Siamese Neural Networks}
-\section{Triplet Loss Function and our modifications}
+
+Siamese Neural Networks are a special class of neural networks used in Similarity Learning. Where many networks used for classification use data to learn what patterns define a class and to recognize those patterns, Siamese networks learn to model a similarity function which simply can tell us if a certain input pattern is similar to another and how much similarity there is.
+
+Siamese neural networks can be used for classification purposes if we have access to training data during inference also. In these cases when an input sample is presented we would simply try to find one similar to it in our training data and output the probability (similarity) that the class is the same. 
+
+These models are called Siamese because they often contain two separate paths or two neural networks of same or similar architecture (similar to our synergy network) which are used for positive and negative processing. These models also often share weights. To clarify, not all Siamese networks use negative processing but it is certainly possible with a specific loss function, more details in the next section.
+
+Siamese neural networks thrive in use cases where there is little data available. Often we need a lot of data to train neural networks to consider every possible input variation and situation, but in the case of Siamese networks, since we are only learning a similarity measure we can use less data to achieve similar goals. This is why these systems are used very often in face-recognition software where we usually have a single image of a person we need to recognize. They are also used for many other tasks: fingerprint recognition, signature verification, plagiarism detection, object tracking etc.
+
+One more benefit of these models in comparison to other classification deep neural network is the ease of online training. One example would again be a face recognition system in an organization. When a new person is hired to some organization if we were using a normal neural network, we would have to retrain it, because the structure would have to different to accommodate the additional output class. If we are using a Siamese network model, this is not needed as we only need some additional training with the new data we have. 
+
+There are some disadvantages to these models however. Because we need to compare the input to all the samples in the training dataset, inference times are usually slower than the traditional CNNs or fully-connected networks. These models also need regularization (weight decay is often used) to stop them from getting stuck in local minims. 
+
+\section{Negative learning with triplet Loss Function and our modifications}
+
+Siamese neural networks are often used with either Contrastive Loss or Triplet Loss functions as a criterion. Contrastive loss, learns embeddings in which two similar samples have a low Euclidean (or other) distance while two dissimilar points have a large Euclidean distance. These embeddings are not suitable for negative learning.
+
+Triplet Loss function uses an interesting concept of negative learning in that it uses negative samples as a regularizer. In triplet loss function, to compute a loss we need three input samples. The main input sample used for training, called the anchor is compared with two other samples from the dataset. The first comparison is between the anchor and a random positive sample and the second comparison is between the anchor and a random negative sample from the dataset. Positive sample is a randomly selected sample for which we know it belongs to the same class as the anchor, while the negative sample is a randomly chosen sample from the training dataset which we know does not belong to the same class. The triplet loss function tries to minimize the difference between the anchor and positive sample and to maximize the difference between the anchor and the negative sample, thus using negative learning as a regularization technique.
+
 \section{Initial experiments and results}
 
+For our experiments we decided to see what would happen if the negative samples were used as main knowledge in training instead of just using them for regularization. 
+
+% TODO: https://github.com/fangpin/siamese-pytorch
+% https://github.com/avilash/pytorch-siamese-triplet
+% https://github.com/bhiziroglu/Siamese-Neural-Networks
+% https://towardsdatascience.com/a-friendly-introduction-to-siamese-networks-85ab17522942
+
 \chapter{Noise Contrastive Estimation Models}
-\section{Negative sampling}
 \section{NCE models}
 
 \chapter{Other models}
@@ -1476,7 +1811,7 @@ Nemanja \cite{novak2010comparison}
 \begin{otherlanguage}{english}
 \chapter{Kratka biografija}
 
-Nemanja
+Nemanjina biografija.
 
 \vfill
 
