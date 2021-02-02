@@ -202,7 +202,7 @@ pdfauthor={\autor}%
 
 \author{\autor}
 \title{\naslov}
-\date{Novi Sad, 2020}
+\date{Novi Sad, 2021}
 \begin{document}
 \frontmatter
 
@@ -237,7 +237,7 @@ Department of Mathematics and Informatics\\ }\hspace{\stretch{1}}
 
 	\vfill
 
-	Novi Sad, 2020
+	Novi Sad, 2021
 	\end{center}
 	\thispagestyle{empty}
 	\newpage
@@ -251,7 +251,7 @@ Department of Mathematics and Informatics\\ }\hspace{\stretch{1}}
 
 \thispagestyle{empty}
 \noindent CC BY-SA \ccbysa\\
-\textcopyright \ 2020 Nemanja Milošević\\
+\textcopyright \ 2021 Nemanja Milošević\\
 This work is licensed under a
 Creative Commons Attribution Share Alike 4.0 International Licence
 \url{https://creativecommons.org/licenses/by-sa/4.0/}
@@ -310,7 +310,7 @@ The simplest example of this concept is a multilayer perceptron (MLP). This stru
 
 The main idea of Deep Learning (DL) and its stacked representations of the input data provides one perspective in which we judge different DL algorithms. Another perspective comes also from depth but in slightly altered way. By using many layered representations of data we allow the machine to process data in a series of steps which is very important for some tasks and makes the algorithms learn better as they focus on smaller steps at a time. The deeper the network, the larger is the number of steps taken towards the solution. Sequential reasoning is powerful because later decisions can refer back to previous decisions. 
 
-@@@ TODO dodati common uses (autoenkoedri)
+% TODO dodati common uses (autoenkoedri)
 
 \section{Deep Neural Networks}
 
@@ -744,12 +744,10 @@ In our model there were a total of 800 values (a vector of length 800) which is 
 
 The implementation of the mentioned modification is very simple in PyTorch library. We only need to modify the "forward" function of the neural net Python module to negate the vector at a specific stage. The backwards pass is calculated automatically with autograd \cite{paszke2017automatic}.
 
+\subsection{Negative feature selection process - binary features?}
 
 
-\subsection{Influence of multiple-step training}
-% TODO dodati ovde dvofaznost
-\subsection{Negative feature selection process}
-% TODO dodati ovde deo oko toga koje su osobine irelevantne kako bi islo
+
 \subsubsection{Detecting relevant features per-class for negation}
 % TODO 
 
@@ -800,6 +798,8 @@ Another modification we tried is to alternate between normal training and traini
 \subsubsection{Note on training process}
 
 For all processes and models, because random initialization is used we made sure to test several times to avoid any coincidental results. In development stages a constant random seed method was used for reproducible results.
+
+
 
 \chapter{Testing}
 
@@ -901,7 +901,6 @@ In Tab.~\ref{tab:results-pmnist}, \ref{tab:results-emnistmnist} and \ref{tab:res
     \toprule
      \textit{Dataset} & {Best model} & {Accuracy} & {Delta} \\
     \midrule
-    %TODO
     {Unmodified - PMNIST}  & {NR} & {99.21} & {0.08} \\
     {Horizontal cut - PMNIST} & {NR} & {56.07} & {11.36} \\
     {Vertical cut - PMNIST} & {ALT} & {69.66} & {12.20} \\
@@ -944,6 +943,32 @@ Here we present concisely the summary of experiments with the classification bas
 \end{itemize}
 
 The results show that classification based on missing features is possible and that these new models we introduced help in partial input scenarios. Our approach, albeit much simpler than some other approaches (e.g. training with adversarial examples) can also help with a very difficult real-world problem of having partial inputs to classify in a critical environment. The partial input example is only one of many use cases for our models that we hope to discover.
+
+\subsection{Influence of multiple-step training}
+During the development of this model, as we mentioned before, a multiple-step training process was used. In this process some layers were frozen and some layers were reset which led to the network having hot starting training properties. similarly to fine-tuning of the model. In other words the network did not learn the patterns from scratch but rather had a baseline in the form of trained convolutional layers. It is therefore important to see how this process contributed to our overall result and to validate that it is the change in our negative feature approach that brings the performance increase and not the fine tuning of the network with the multiple-step training process. 
+
+To do so we created a simple experiment where a normal network without the negative path activated is trained for a number of epochs and then similarly to our negative network we freeze the convolutional layers, reset the fully connected layers and continue training. The process therefore is exactly the same as for training the hybrid model but without the negative activation function.
+
+In the Table \ref{tab:results-twophase} the results are shown where the two-phase approach did not bring the same level of improvement as our negative model approach. In some cases the performance is severely degraded as can be seen in the table. This experiment confirms our intuition about the negative model and proves that a simple modification of the training process where multiple phases are added does not bring increased performance.
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{rS[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]S[table-format=2.1]}
+    \toprule
+     \textit{Dataset/Model} & SN & ONN & HN & NR & ALT & TP \\
+    \midrule
+    {Unmodified MNIST} & {99.13} & {98.90} & {99.18} & {99.21} & {99.05} & {96.79} \\
+    {Horizontal cut} & {44.71} & {48.96} & {52.33} & {56.07} & {41.60} & {24.84} \\
+    {Vertical cut} & {57.46} & {64.64} & {60.45} & {66.07} & {69.66} & {43.82} \\
+    {Diagonal cut} & {52.97} & {59.59} & {55.40} & {56.01} & {62.49} & {54.44} \\
+    {Triple cut} & {40.68} & {34.62} & {41.19} & {41.73} & {46.40} & {47.37} \\
+    
+    \bottomrule
+  \end{tabular}
+  %
+  \caption{Results with accuracy for all models used on newly introduced PMNIST validation sets. Included in this table as a validation effort is also the two-phase normal non-negative network (last column, TP for two-phase network).}
+  \label{tab:results-twophase}
+\end{table} 
 
 \subsection{Negative Convolutional Kernel Experiments}
 
@@ -1248,10 +1273,11 @@ We experimented with black-box PGD attack where we gave it all of our five model
      HN & {48.58} & {53.83} & \textit{{31.68}} & {56.74} & {56.61} & {53.94} \\
      NR &{51.31} & {53.62} & {54.75} & \textit{{35.81}} & {59.27} & {54.73}\\ 
      ALT & {50.56} & {54.38} & {51.01} & {55.22} & \textit{{37.70}} & {52.79}\\
-     % todo dodati avg dole
+    \midrule 
+     Avg. acc. & {44.47} & {50.00} & {49.25} & {52.72} & {55.39} \\
     \bottomrule
   \end{tabular}
-  \caption{Results with accuracy for all models against PGD black-box attack. On the diagonal in italic font are the actual PGD white-box attack accuracies (same Holdout and Target model). We can see more severe damage caused by PGD in these cases. These results are taken for the middle epsilon value: \(\epsilon = 0.15 \). In the last column we can see the average accuracy for models when using PGD as a black-box attack (accuracy for the white-box attack omitted) where the negative network performs best. The results are better for greater \(\epsilon\) values. Full results are available in the code repository.}
+  \caption{Results with accuracy for all models against PGD black-box attack. On the diagonal in italic font are the actual PGD white-box attack accuracies (same Holdout and Target model). We can see more severe damage caused by PGD in these cases. These results are taken for the middle epsilon value: \(\epsilon = 0.15 \). In the last column we can see the average accuracy for models when using PGD as a black-box attack (accuracy for the white-box attack omitted) where the negative network performs best. The last row presents average accuracies when using different models as target models, where we see again the negative models outperforming the normal model. The results are generally better for greater \(\epsilon\) values. Full results are available in the code repository.}
   \label{tab:results-pgd}
 \end{table} 
 
@@ -1270,32 +1296,6 @@ Ensemble Learning can also be used in Deep Learning. One good example is in the 
 Our synergy network described here takes inspiration from ensemble learning models and the Siamese neural network model. In synergy networks as we will see, we have two models working in parallel. These models share some weights and have the same architecture but one of them is a negative model while the other is the "positive" or a normal neural network model.
 
 % TODO ovaj chapter srediti malo, ili mozda pomeriti dole
-\section{Experiments with different network joining techniques}
-
-In synergy nets, one of the questions which needs to be answered is on model joining. In other words how can outputs of two models be joined and a single result produced. In our classification problem, both networks are created in such a way that they output probabilities, per-class for every known class in the dataset. So the output of both networks is a one-dimensional vector of length \( N \) where \( N = number of classes in the dataset \). These two vectors of probabilities need to be equally considered and joined so our joint model can make a prediction/decision.
-
-\subsection{Addition}
-
-The simplest way to join these two vectors, and in that way to join the two models: the negative and the positive one, is to use addition. To use addition we would sum the probabilities per-class. So the probability for the first class as an example would be \( p(c0) = p_p(c0) + p_n(c0) \), where \( p(c0) \) is the probability of the first class (we use zero indexing) and the \(p_p(c0)\) and \(p_n(c0)\) represent the probabilities from positive and negative networks respectably. We would do this operation for all the classes which in turn means that we are simply using element-wise addition of the both probability vectors as the output of the synergy net. This approach is currently used in the models we display here.
-
-Several upgrades to this process are possible.
-
-One upgrade would be to use a hyperparameter \( \omega = \) "importance of negative network"  which would control how both probabilities are taken into count when doing addition. With this parameter we can control the importance of both models, which could be useful in some scenarios where one network heavily outperforms the other one. If we are using this parameter the addition formula we mentioned before would be slightly different, in that the probabilities output from the negative network would be multiplied with the hyperparameter value: \( p(c0) = p_p(c0) + p_n(c0) * \omega \)
-
-Another upgrade would be to divide the resulting probabilities with a number of networks from which they are sourced. This is not necessary if we are doing addition at the end of the model, since it is very likely that an \( argmax \) operation would be used for a final predictions. If however we need the final probabilities or they have to be used further in the model pipeline we would need to perform this normalization process: \( p(c0) = (p_p(c0) + p_n(c0)) / 2 \).
-
-\subsection{Multiplication}
-
-It is also possible, in a similar fashion to use multiplication instead of addition. It is clear that in this case the multiplication of the probabilities would bring higher confidence in the resulting model, without regard to accuracy. For example, if both networks output high probability for one class, its resulting probability would be exponential. And if models are in disagreement (one outputs high probability, other low) the resulting probability would be low. This means that the resulting probabilities would be high only if both models agree. We will experiment with multiplication, further down in the document.
-
-\subsection{Fully-connected blocks}
-
-Both addition and multiplication bring linearity to our model joining. But it is also possible to model the architecture in a way where we have non-linearity's. The easiest way to accomplish this is to use one or more fully connected layer neural network before the final output of the model. This neural network model would consider (as its input) both the probabilities of the positive and negative models and would output the final probabilities. If we are to model the architecture in this way, we can then allow our model to learn specific information about both our models and their performance. One example would be that we can learn in what cases one model performs better than the other and what model to prioritize. Another possibility is to also give the final neural network model insight into the input data which both networks processed. Then, this model would be able to learn what model performs better in which case.
-
-\subsection{Neural Network Fusion in multi-modal systems}
-
-% pricati o fusion u multi modal sistemima, yutub video
-% todo
 
 \chapter{Experimental hypothesis}
 
@@ -1372,8 +1372,7 @@ We are aware that there are more performant, complex, deeper (and wider) models 
 
 In the negative network we use negation or inversion of the output of the feature-extracting convolutional layers. The process of obtaining the negative features depends on the output of the last convolutional layer in the convolutional blocks. Namely, it is very important which activation function is used in this last layer so we know what range of values we can expect as the output. We are using ReLU activation function throughout the convolutional layers of our models and the outputs are strictly positive values. Therefore we can calculate what features are missing (negative features) as they have very low, close to zero values. 
 
-It is important to note that the negation function can also be applied to the convolutional kernel directly. % TODO
-However, in our approach we found it easier to apply the negation after the activation function since it is easier to work with only positive, scaled values. When ReLU activation function is applied, we can think of the output as the actual feature-positional vector where present features have high values and all the other features have values close to zero. It is yet to be determined if this approach is somehow different to our approach and if it can help with performance.
+It is important to note that the negation function can also be applied to the convolutional kernel directly as we described previously, when introducing the negative model. As mentioned, in our approach we found it easier to apply the negation after the activation function since it is easier to work with only positive, scaled values. When ReLU activation function is applied, we can think of the output as the actual feature-positional vector where present features have high values and all the other features have values close to zero. It is yet to be determined if this approach is somehow different to our approach and if it can help with performance.
 
 For our negative model, we have experimented with different negation functions \cite{milovsevic2019classification}, but have found that \( f(x) = 1 - x \) works best. When this function is applied to the squashed output feature vector, we obtain a new vector where negative features have values close to \(1\) and the present features have values either close to \(0\) or negative values. Either way, when these values are propagated through the following layers which also use ReLU activations, only the low impact (negative) features will be considered as they will have values close to one. It is important to note that the convolutional layers almost never output binary outputs with regards to whether a feature is missing or present. This is a shortcoming we hope to address in the future with further research regarding the negation process. When negation function is active, the forward pass through the network changes slightly compared to the normal network as can be seen in the Equation \ref{eq:3}. We emphasize that the convolutional part of the network is trained and reused from the normal network as can be seen in Equation \ref{eq:1}. The fully connected layers (\emph{fc1n}, \emph{fc2n}, \emph{fc3n}) are different (do not share weights with previous model).
 
@@ -1432,13 +1431,8 @@ Both inaccurate & 2536 \\
 The training processes for our model are very similar to our previous experiments with the MNIST dataset. \cite{milovsevic2019classification} The first step in the training process is to train the normal, unmodified network. The training parameters have been described in section \ref{modelarch}. After the training of the normal model we freeze its convolutional layers because they are to be used in other models.
 
 The second network we train is the negative network. The training process is the same as with the normal network apart from that the convolutional layers are already trained and loaded before training. In a way, we are performing fine-tuning of the network with the frozen convolutional layers from the normal network and with the negation operation activated. 
-
-
-
 \subsection{Synergy network}
 \label{synergy}
-
-
 
 After we train the normal network and the negative network, we can join these models into a new model which we call synergy network. Synergy network is an ensemble of two networks of the exact same architectures, where one network is a traditional neural network model and the other one is a negative model. The simplified architecture diagram can be seen in Figure \ref{fig:1}. Both networks are already trained, meaning that creating the synergy network does not require additional training, rather just parameter copying. 
 
@@ -1651,7 +1645,7 @@ Trained Synergy (h.s.) & 64.28 & 64.14 & 62.23 & 56.11\\
 
 \begin{table}
 \centering
-\caption{Validation accuracies of the models with testing with datasets with block removed partial samples. Best results in bold text.}
+\caption{Validation accuracies of the models when testing with datasets with block removed partial samples. Best results in bold text.}
 \label{tab:9}
 \tabcolsep=0.06cm
 \begin{tabular}{lccccc}
@@ -1667,10 +1661,83 @@ Trained Synergy (h.s.) & 64.28 & 52.73 & 54.37 & 62.00 & 46.27 \\
 \end{tabular}
 \end{table}
 
+\section{Experiments with different network joining techniques}
+
+In synergy nets, one of the questions which needs to be answered is on model joining. In other words how can outputs of two models be joined and a single result produced. In our classification problem, both networks are created in such a way that they output probabilities, per-class for every known class in the dataset. So the output of both networks is a one-dimensional vector of length \( N \) where \( N = number of classes in the dataset \). These two vectors of probabilities need to be equally considered and joined so our joint model can make a prediction/decision.
+
+\subsection{Addition}
+
+The simplest way to join these two vectors, and in that way to join the two models: the negative and the positive one, is to use addition. To use addition we would sum the probabilities per-class. So the probability for the first class as an example would be \( p(c0) = p_p(c0) + p_n(c0) \), where \( p(c0) \) is the probability of the first class (we use zero indexing) and the \(p_p(c0)\) and \(p_n(c0)\) represent the probabilities from positive and negative networks respectably. We would do this operation for all the classes which in turn means that we are simply using element-wise addition of the both probability vectors as the output of the synergy net. This approach is currently used in the models we display here.
+
+Several upgrades to this process are possible.
+
+One upgrade would be to use a hyperparameter \( \omega = \) "importance of negative network"  which would control how both probabilities are taken into count when doing addition. With this parameter we can control the importance of both models, which could be useful in some scenarios where one network heavily outperforms the other one. If we are using this parameter the addition formula we mentioned before would be slightly different, in that the probabilities output from the negative network would be multiplied with the hyperparameter value: \( p(c0) = p_p(c0) + p_n(c0) * \omega \)
+
+Another upgrade would be to divide the resulting probabilities with a number of networks from which they are sourced. This is not necessary if we are doing addition at the end of the model, since it is very likely that an \( argmax \) operation would be used for a final predictions. If however we need the final probabilities or they have to be used further in the model pipeline we would need to perform this normalization process: \( p(c0) = (p_p(c0) + p_n(c0)) / 2 \).
+
+\subsection{Multiplication}
+
+It is also possible, in a similar fashion to use multiplication instead of addition. It is clear that in this case the multiplication of the probabilities would bring higher confidence in the resulting model, without regard to accuracy. For example, if both networks output high probability for one class, its resulting probability would be exponential. And if models are in disagreement (one outputs high probability, other low) the resulting probability would be low. This means that the resulting probabilities would be high only if both models agree. We have experimented with multiplication and while it is possible to use it, it does not bring significant performance improvement in model accuracy as can be seen in Table \ref{tab:10}. While the synergy networks still outperform the normal network the performance is worse than the synergy network with normal addition. This can be seen when comparing Tables \ref{tab:9} and \ref{tab:10}. There may be another use case (dataset) or type of problem (e.g. sequence modelling) where this approach could lead to additional performance but it is yet to be tested.
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models using multiplication when testing with datasets with block removed partial samples. Best results in bold text.}
+\label{tab:10}
+\tabcolsep=0.06cm
+\begin{tabular}{lccccc}
+\hline\noalign{\smallskip}
+\emph{Model/Dataset} & Unmod. & SSK & SSKR & MSK & MSKR \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 62.69 & 52.73 & 51.89 & 59.02 & 47.63 \\
+Negative & 63.38 & 51.94 & 53.90 & 60.20 & 46.34 \\
+Synergy & 56.24 & 45.70 & 44.21 & 52.30 & 41.09 \\
+Trained Synergy & \textbf{64.27} & \textbf{53.36} & \textbf{55.20} & \textbf{60.48} & \textbf{48.38} \\
+Trained Synergy (h.s.) & 56.21 & 46.69 & 49.27 & 52.21 & 38.40 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\subsection{Fully-connected blocks}
+
+Both addition and multiplication bring linearity to our model joining. But it is also possible to model the architecture in a way where we have non-linearity's. The easiest way to accomplish this is to use one or more fully connected layer neural network before the final output of the model. This neural network model would consider (as its input) both the probabilities of the positive and negative models and would output the final probabilities. If we are to model the architecture in this way, we can then allow our model to learn specific information about both our models and their performance. One example would be that we can learn in what cases one model performs better than the other and what model to prioritize. Another possibility is to also give the final neural network model insight into the input data which both networks processed. Then, this model would be able to learn what model performs better in which case. It is important to note here that the synergy model would require small amount of training in this case, compared to the synergy model we described before, where the normal and negative models are simply joined.
+
+
+% TODO ovaj deo:
+
+In the Table \ref{tab:synergyfc} some initial results with a one additional fully-connected network added. We can see already that this approach is promising and removes the need to choose what joining function needs to be used.
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models when testing with datasets with block removed partial samples. Best results in bold text. Last row represents the newly introduced Synergy network with the fully connected layers at the end (SynergyF)}
+\label{tab:synergyfc}
+\tabcolsep=0.06cm
+\begin{tabular}{lccccc}
+\hline\noalign{\smallskip}
+\emph{Model/Dataset} & Unmod. & SSK & SSKR & MSK & MSKR \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 63.30 & 54.04 & 56.89 & 61.15 & 47.60 \\
+Synergy & 66.98 & 55.24 & 59.85 & 64.49 & 49.35 \\
+SynergyF & \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+
+\subsection{Neural Network Fusion in multi-modal systems}
+
+% pricati o fusion u multi modal sistemima, yutub video
+% todo
+
+
 \section{Synergy Robustness to Adversarial Attacks}
 
 \subsection{White-box attacks: Fast Gradient Sign Method attack on the synergy models}
+
+% TODO
+
 \subsection{Black-box attacks: Black box Projected Gradient Descent attack on the synergy models}
+
+% TODO
 
 \section{Summary and Future Work}
 \label{summary}
@@ -1701,13 +1768,13 @@ In the second case, manual labeling can be avoided if we use several models for 
 
 Where negative learning models showed promise is in the problem of noisy label classification. Having dataset with clean labels is very rare in real world scenarios, and even datasets which are used commonly for neural network training (e.g. MNIST, CIFAR) have wrongly classified samples in them. These samples we called noisy samples or samples with noisy labels.
 
-During production of this dissertation, a lab from South Korea is also experimenting with negative models for tasks of noisy label classification. In the paper they use Negative learning models (with random negative sampling as described above) to train models more robust to noisy labels. In the paper CNNs are trained using a complementary, synthetic label as in "input image does not belong to this complementary label". The main premise is that for noisy label classification negative samples provide wrong information much less frequently than normal unmodified data. This prevents the network from overfitting or m
+During production of this dissertation, a lab from South Korea has also been experimenting with negative models for tasks of noisy label classification. In the paper they use Negative learning models (with random negative sampling as described above) to train models more robust to noisy labels. In the paper CNNs are trained using a complementary, synthetic label as in "input image does not belong to this complementary label". The main premise is that for noisy label classification negative samples provide wrong information much less frequently than normal unmodified data. This prevents the network from overfitting or remembering the wrongly labeled data.
 
 Their approach has some, albeit small similarities to the methods presented in this dissertation. First of all, the models described in the paper only concern robustness to noisy labels not general robustness of the model to input modifications or adversarial attacks as we experimented. They also use negative sampling to generate negative samples for training and a simple modification to the loss function where the softmax output of the network is inverted (all classes have probability value 1 apart from the actual class which has a value of 0). They also experiment with a combination of positive and negative learning models (with somewhat similar goals like our synergy network) to overcome bad performance on cleaner datasets without noisy labels where normal, positive models outperform negative models. This method can be used also for data filtering so that noisy labeled data can be removed from the dataset used later on.
 
 In the paper it is demonstrated that the introduced negative models and negative sampling in general can help in creating models more robust to noise in the label data, both artificially added and the actual noise in the datasets, another use case for the negative models related to robustness.
 
-It is very possible that the models introduced in this paper could also be useful for classification of partial or adversarial examples but this remains to be tested at a future time.
+It is very possible that the models introduced in this paper could also be useful for classification of partial or adversarial examples but this remains to be tested at a future time. We will demonstrate our approach to "pure" negative training with Siamese Neural Networks where the gradients are actually "pulled away" from the negative class.
 
 \chapter{Siamese Neural Networks}
 
@@ -1727,40 +1794,137 @@ There are some disadvantages to these models however. Because we need to compare
 
 Siamese neural networks are often used with either Contrastive Loss or Triplet Loss functions as a criterion. Contrastive loss, learns embeddings in which two similar samples have a low Euclidean (or other) distance while two dissimilar points have a large Euclidean distance. These embeddings are not suitable for negative learning.
 
+\begin{figure}
+    \centering
+    \includegraphics[trim=0.5cm 2.6cm 0.5cm 5cm,scale=0.73]{figures/siamese.pdf}
+    \caption{Example of Face Identification Siamese Neural Network training with triplet loss function. A triplet of data samples is used: current sample for which we are training, a positive sample of the same class and a negative example of another class. After embeddings are computed and the distances are calculated the optimizer of the model minimizes the distance between same class samples and maximizes the distance between the current sample and the negative sample.}
+    \label{fig:siamese}
+\end{figure}
+
 Triplet Loss function uses an interesting concept of negative learning in that it uses negative samples as a regularizer. In triplet loss function, to compute a loss we need three input samples. The main input sample used for training, called the anchor is compared with two other samples from the dataset. The first comparison is between the anchor and a random positive sample and the second comparison is between the anchor and a random negative sample from the dataset. Positive sample is a randomly selected sample for which we know it belongs to the same class as the anchor, while the negative sample is a randomly chosen sample from the training dataset which we know does not belong to the same class. The triplet loss function tries to minimize the difference between the anchor and positive sample and to maximize the difference between the anchor and the negative sample, thus using negative learning as a regularization technique.
+
+
 
 \section{Initial experiments and results}
 
 For our experiments we decided to see what would happen if the negative samples were used as main knowledge in training instead of just using them for regularization. 
 
-% TODO: https://github.com/fangpin/siamese-pytorch
-% https://github.com/avilash/pytorch-siamese-triplet
-% https://github.com/bhiziroglu/Siamese-Neural-Networks
-% https://towardsdatascience.com/a-friendly-introduction-to-siamese-networks-85ab17522942
+% TODO: tekst i opis modela za sijamsku negativnu
 
 \chapter{Noise Contrastive Estimation Models}
-\section{NCE models}
 
-\chapter{Other models}
+Another negative model used most notably in Natural Language Processing is the NCE (Noise Contrastive Estimation) model.
+
+This model tries to solve the issue of having large vocabularies in language tasks where huge neural network models are needed, even for simple tasks. 
+
+One example would be in the next-word prediction tasks in which given a part of the sentence a model would be able to predict the next written word. This system is commonly used and needed for accessibility reasons or faster typing on for example mobile devices. It is also used in grammar checking software. The models for next-word prediction are trained on large corpuses of text. Before training the data is processed so that unique words are found. This step is important because vocabulary size defines the architecture of the model. If we have a densely connected network we need to have the output layer of size of the vocabulary where every output neuron represents a single word from the vocabulary. Then a softmax function is used to process the output vector and we then obtain the next word index and the word from the vocabulary. It is immediately apparent that this is an issue when we have large vocabularies as our network needs to be very wide, especially if we have multiple words as inputs. 
+
+NCE models work differently in that they do not learn how to classify (this task can be looked upon like it is multi-class classification problem) but rather how to separate actual word pairs (word that are supposed to be together, positive samples) from the noisy pairs (negative samples). This is achieved by creating positive and negative input samples, where positive samples are all of the same lenght which is much shorter than the vocabulary and contain words found often together in the input text dataset. Negative samples are formed in the opposite way: words which are rarely used together are formed as negative samples. For NCE models it is very important to define the \(window\_size\) parameter which is used to define the length of the input data. NCE uses negative sampling to choose random words for the creation of negative input samples but some variants also use words least frequently used in pairs as an additional regularization technique (word2vec).
+
+Most notable implementation of this algorithm is in the unsupervised learning word2vec algorithm. In this algorithm this method is used to generate word embeddings in a multidimensional space where words which are used together have similar embeddings -- they are close in the vector space. 
+
+The basic idea is to convert a multinomial classification problem (as it is the problem of predicting the next word) to a binary classification problem. That is, instead of using softmax to estimate a true probability distribution of the output word, a binary logistic regression (binary classification) is used instead.
+
+For each training sample, the classifier is fed a true pair (a center word and another word that appears in its context) and a number of \(k\) randomly corrupted pairs (consisting of the center word and a randomly chosen word from the vocabulary). By learning to distinguish the true pairs from corrupted ones, the classifier will ultimately learn the word vectors --instead of predicting the next word (the "standard" training technique), the optimized classifier simply predicts whether a pair of words is good or bad.
+
+Word2Vec slightly customizes the process and calls it negative sampling. In Word2Vec, the words for the negative samples (used for the corrupted pairs) are drawn from a specially designed distribution, which favours less frequent words to be drawn more often.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{figures/word2vec.png}    \caption{2-D space of English words generated with word2vec. Words with similar semantic meaning are close in the embedding space. Image taken from https://medium.com/analytics-vidhya/implementing-word2vec-in-tensorflow-44f93cf2665f}
+    \label{fig:word2vec}
+\end{figure}
+
+
+% TODO
+% https://proceedings.neurips.cc/paper/2013/file/9aa42b31882ec039965f3c4923ce901b-Paper.pdf
 
 \part{Negative Deep Learning in Agent Environments}
 
-\chapter{A short introduction to Deep Reinforcement Learning}
+In this part of the dissertation we discuss negative learning suitable for agent environments, namely with Deep Reinforcement Learning algorithms.
+
+\chapter{Deep Reinforcement Learning}
+
+Reinforcement learning (RL) is a field in agent-based artificial intelligence. Main parts of defining a RL problem are the agent and the environment. The environment can be seen as "outside world" full of parameters and interactions in which the agent lives and interacts. At every stem the agent has a partial or complete observation of the state of the world and based on that state decides which action to take. The environment can also change based on the agent's decision.
+
+Another important point is the concept of a reward signal. A reward is a signal from the environment which the agent receives and it denotes how "good" or "bad" the current world state is. The goal of the agent is to maximize its cumulative reward, sometimes called return. All RL algorithms model ways how the agent can learn to behave in order to maximize the return and achieve its goal.
+
+When talking about RL algorithms, one important distinction is whether the environment has discrete action spaces or continuous actions spaces. In an environment with a discrete action space only a finite number of moves (actions) are available to the agent while in the continuous action space environments (e.g. robotic hands) we do not have a finite number of moves and the actions are real-valued vectors (e.g. move hand 10 centimeters over x axis). This distinction is important because it dictates our algorithm selection as some algorithms work better in discrete action spaces and some algorithms can only be applied to one type of the action space.
+
+Another important term is policy. Policy (sometimes called simply agent) is a rule used by the agent to make decisions. In RL we use parametrized policies: policies whose outputs are computable functions that depend on a set of parameters (e.g. weights of a neural network) which we can adjust to modify behaviour. 
+
+
+\section{Motivation and use-cases} 
+
+% https://towardsdatascience.com/applications-of-reinforcement-learning-in-real-world-1a94955bcd12
+
+Agent environment artificial intelligence has found many uses over the years. From game programming to path finding navigation software a problem formulation of agent and a changeable environment has been a foundation of computer science. In this section we mention some of recent use cases to demonstrate the importance and possibilities of Deep RL algorithms.
+
+First interesting use case is described in "Resource Management with Deep Reinforcement Learning" where it is shown how a RL model can be trained to automatically schedule computing resources and jobs with the objective to minimize waiting time thus optimizing throughput of exteremly large computer systems.
+
+Another use case where RL represents a state-of-the-art solution is in the Traffic Light Control problem, where a RL algorithm can be designed to control traffic lights. The model takes into count traffic flow in lanes and current light states to predict and generally optimize the traffic flow.
+
+Of course, usage of reinforcement learning algorithms has found great success in real-world agent problems -- robotics. Some novel approaches even include models which can learn from raw videos of humans (or robots) doing different tasks and replicating that behaviour.
+
+Lastly we mention games, where RL algorithms dominate model leaderboards in different competitions. Game agent development was the use case which really showed the possibilities in using these models. It is not rare that these algorithms achieve super-human performance on various games beating even most skillful of players. The most famous algorithms surely is Google's AlphaGo an algorithm which can play the game of Go, a very complex board game.
+
 \section{Deep Q Learning}
-\section{Other models}
 
-\section{Motivation and use-cases}
+% https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc
+
+% https://www.tensorflow.org/agents/tutorials/0_intro_rl
+
+Deep Reinforcement Learning is a relatively new and exciting field of Machine Learning which aims to use new and modern Deep Learning models as agents for Reinforcement Learning problems.
+
+In (Deep) Reinforcement Learning we split the models into two large groups: model-free and model-based RL algorithms. Model-free RL algorithms learn a direct mapping of state to action. Policy gradient methods are one example of a model-free algorithm. Model-based algorithms work differently in that they learn a model of their environment as an intermediate step in learning. Then the agent's reward and return needs to be maximized. Q-Learning is a model-based algorithms because in the process of learning a Q-Table is created and this table maps states to actions.
+
+A Q-table in non-deep Q-Learning is an actual table of state-action, q-value pairs. At the beginning of training it is initialized to all zero values. The table is used as "memory" to keep states, actions and their expected rewards. Q-value represents the estimated optimal (maximum) future value of the reward. The agent will randomly try actions and memorize what reward they have brought. In this trial and error process the environment is modeled and remembered for future attempts where the best known action is chosen.
+
+There have been various upgrades to the Q-Learning algorithm. One particularly interesting is the Epsilon-Greedy Exploration Strategy in which the agent sometimes (randomly) chooses a random action instead of the known optimal one. This is so the agent gains more experience and possibly finds better actions for states for future use.
+
+Updates to the Q-Table are done by using the Bellman Equation (Equation \ref{eq:Bellman}).
+
+\begin{equation}
+\label{eq:Bellman}
+Q(S_t, A_t) = (1 - \alpha) Q(S_t, A_t) + \alpha * (R_t + \lambda * max_a Q(S_t+1, a))
+\end{equation}
+
+In the Bellman's equation, S represents the state, A represents the action, R represents the reward from taking A, t is the time stamp, \(\alpha\) is learning rate and the \(\lambda\) is the discount factor. The \(\lambda\) discount factor causes rewards to lose their value over time so more approachable immediate rewards are valued more highly. This is a regularization technique which prevents local optimums.
+
+In Deep Q-Learning the Q-Table is replaced with a neural network (DQN). The neural network model learns patterns in states so it can map input states to (action, Q-value) pairs. Deep Q-Learning models usually suffer from instability in large action spaces, and this is the reason most implementations have two networks (main, target) with the same architecture but different weights. The goal of this is to allow our algorithm to backtrack in learning by replacing the weights between the two networks periodically. The architecture of the DQN is very simple. The input nodes are containing values that embed the state. The output nodes represent the actions. Every output node represents a certain action while the value of the node is the action's q-value. 
+
+The weight updates are a bit different than traditional neural network models as a concept called Experience Replay is used. The main network samples and trains on a batch of past experiences which are gathered for a number of steps. The main network weights are then copied to the target network after a number of batches.
+
+Experience Replay (ER) is a concept in RL and it can be summarised as storing and replaying environment states (\emph{state, action, reward, next-state}). The algorithm then learns from this data. Experience Replay can be used in off-policy algorithms to learn in offline fashion. Deep Q-Learning uses ER to learn in batches in order to prevent the model from "wandering" away in a series of wrong actions.
+
 \section{Negative Rewards and Punishments}
-\section{Overview of existing models}
 
-\chapter{Testing environments}
-\section{OpenAI Gym Environments}
-\section{Infinite Negative Testing Environment}
+In terms of negative learning and reinforcement learning, a formulation where negative learning is used in agent environments is very natural. As we mentioned a key component of learning in RL algorithms is the connection between state space, action space and most importantly here the reward function. Reward function controls the agent behaviour because we are always optimizing the behaviour so that the reward is maximized. Therefore, to define a negative learning in agent environments we simply define a reward function which only gives insight to the agent of which actions are the worst. There could be many actions with neutral or positive reward value but we do not optimize for that subset of actions. We only teach the agent what not to do or in other words what action not to choose in any situation.
+
 \subsection{Collision Avoidance in Open Environments with Negative Deep Reinforcement Learning}
 
-\chapter{Results}
-\section{Convergence time comparison}
-\section{Model performance}
+One example where this type of agent is beneficial can be easily described with collision avoidance systems. In a collision avoidance system it usually is not important which action is chosen by the agent if the action that is chosen is not leading to failure (collision). A cumulative reward of 0 is perfect as this means there is no penalties for collisions. One real-world example would be in self-driving cars or birds in the sky. If we imagine that the sky is an infinite space in which several agents are operating (flying) we can define a well rewarded system by defining a system in which the agents do not collide and continue operating. This system can be defined only by defining negative rewards (punishments) where a collision is to be avoided. Positive and neutral rewards are implicit and not defined in this system. For experimentation, this environment has been defined as a OpenAI gym environment. OpenAI Gym is a collection of environments for agent training and testing as well a set of interfaces for defining new environments. This environment's goal is to show a proof of concept results that training negative agents (agents with only negative rewards) is possible.
+
+\subsection{Implementation}
+
+% TODO ovde ide tekst oko implementacije demo-a
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.2]{figures/dqn_bird.png} 
+  \caption{Example DQN environment for testing using only negative rewards (punishments). A bird is the agent and the grey dots are the obstacles that need to be avoided. Implementation with turtle module and Keras (TensorFlow).}
+  \label{fig:bird}
+\end{figure}
+
+
+\subsubsection{Model performance and results}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.8]{figures/dqn_results.png} 
+  \caption{DQN rewards for the open collision environment. Model converges quickly in just a few episodes bringing the reward to zero. Sudden "dips" in the reward plot represent model instability because the environment is stochastic i.e. the obstacles have randomized positions and movement vectors.}
+  \label{fig:bird}
+\end{figure}
 
 \part{Appendices}
 \chapter{Source code and Reproducibility}
@@ -1798,27 +1962,50 @@ We have taken some additional steps with the used libraries and tools so that ou
 \chapter{Short Biography}
 
 
-Nemanja \cite{novak2010comparison}
+Nemanja Milošević was born on 20.11.1992 in Ruma.
+
+He finished ``Jovan Jovanović Zmaj'' elementary school in Ruma in 2007,
+followed by high school ``Gimnazija Stevan Puzić'', Ruma, in 2011. The same year he enrolled into the Faculty of Sciences in Novi Sad to study computer science. He obtained his BSc diploma in June of 2014, and a masters degree in September of 2016. In 2020 he participated in Erasmus+ Doctoral Student Exchange Program, studying at University of Coimbra, Portugal for six months.
+
+He has been involved in teaching at the Department of Mathematics and
+Informatics, Faculty of Sciences in Novi Sad, as a teaching and research assistant since 2016.
+
+He has conducted theoretical and practical exercises in several
+computer science courses for undergraduate and master students,
+including Artificial Intelligence 1, Databases 1 and 2, Business Software Development, Python Development and Computer Networks.
+
+He coauthored four papers as conference proceedings and
+journal articles. He was a conference presenter more than ten times both on national and international conferences. He participated as a Machine Learning researcher on both national (GRASP - Graphs in Space: Graph Embeddings for Machine Learning on Complex Data) and international projects including H2020 projects (I-BiDaas - Industrial-Driven Big Data as a Self-Service Solution, C4IIOT - Cyber security 4.0: Protecting the Industrial Internet of Things).
+
+He is an supporter of Open Source Software and a contributor to several open source software projects most notably, Fedora Project and PyTorch.
 
 \vfill
 
 
 \begin{tabbing}
   \hspace{0.7\textwidth} \= nebitan tekst \kill
-  Novi Sad, 2020 \> Nemanja Milošević
+  Novi Sad, 2021 \> Nemanja Milošević
 \end{tabbing}
 
 \begin{otherlanguage}{english}
 \chapter{Kratka biografija}
 
-Nemanjina biografija.
+Nemanja Milošević se rodio 20. novembra 1992. godine u Rumi.
+
+Završio je osnovnu školu ``Jovan Jovanović Zmaj'' u Rumi 2007. godine, a zatim srednju školu ``Gimnazija Stevan Puzić`` u Rumi 2011. godine. Iste godine upisuje osnovne akademske studije informatike na Prirodno-matematičkom fakultetu u Novom Sadu. Završava trogodišnji program u junu 2014. godine a master diplomu dobija u septembru 2016. godine. 2020. godine učestvuje na Erasmus+ razmeni doktorskih studenata sa Univerzitetom u Koimbri, Portugal gde je bio doktorski student u šestomesečnom periodu.
+
+Nemanja je asistent u nastavi na Departmanu za matematiku i informatiku Prirodno-matematičkog fakulteta u Novom Sadu od 2016. godine. Držao je vežbe iz nekoliko predmeta na osnovim i master studijama: Veštačka Inteligencija 1, Baze podataka 1 i 2, Razvoj poslovnih sistema, Računarske Mreže i Seminarski rad A - Python.
+
+Nemanja je koautor na četiri rada objavljenim na međunarodnim konferencijama i u međunarodnim časopisima. Držao je više od deset predavanja na međunarodnim konferencijama. Kao istraživač u oblasti mašinskog učenja učestvovao je na državnim (GRASP - Graphs in Space: Graph Embeddings for Machine Learning on Complex Data) kao i na međunarodnim projektima uključujući i Horizon 2020 projekte I-BiDaaS i C4IIOT.
+
+Otvoreno podržava razvoj slobodnog softvera i deo je razvojnog tima više projekata otvorenog koda od kojih su najznačajniji Fedora Project i PyTorch.
 
 \vfill
 
 
 \begin{tabbing}
   \hspace{0.7\textwidth} \= nebitan tekst \kill
-  Novi Sad, 2020. \> Nemanja Milošević\\
+  Novi Sad, 2021. \> Nemanja Milošević\\
   \\
   \> \makebox[0.3\textwidth]{\dotfill}
 \end{tabbing}
