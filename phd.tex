@@ -297,7 +297,19 @@ Finally I thank my world Nataša Sukur for everything she has done for me, pushi
 
 \chapter{Rezime}
 
-TODO: Ovde ide apstrakt na srpskom
+U današnje vreme upotreba dubokog učenja radi prepoznavanja određenih paterna u podacima postala je nezamenljiv alat u mnogim sistemima. U kritičnim sistemima pogotovo, duboke neuronske mreže se često koriste čak i u scenarijima koji direktno utiču na naše živote. Upravo to je razlog što se u poslednje vreme u istraživanju sve više stavlja akcenat na duboko razumevanje ovih modela i na modele koji su dokazano pouzdani, robusni i sigurni za upotrebu.
+
+U ovoj doktorskoj disertaciji istražujemo negativne modele dubokog mašinskog učenja kao novi pristup razvoju modela sa visokim performansama i još važnije sa povećanom robustnošću i pouzdanošću u poređenju sa modelima današnjice. Takođe se bavimo nadogradnjama postojećih modela sa našim negativnim pristupom i pokazujemo kako se postojeći modeli mogu unaprediti bez velikih promena u arhitekturi.
+
+Kod modela za klasifikaciju slika (danas najrasprostranjenija primena dubokih konvolutivnih neuronskih mreža) pokazaćemo kako se ovi modeli mogu nadograditi i izmeniti kako bi u obzir uzimali i negativne osobine -- one osobine koje znamo da postoje a nisu trenutno prisutne u ulaznim podacima.
+
+Za sve modele predstavljene u ovoj disertaciji biće prikazana duboka analiza procesa kao što su negacije osobina, negativne aktivacione funkcije, zamrzavanje slojeva neuronskih mreža, transfer znanja iz jedne mreže u drugu, fine-tuning pristup treniranju, inverzije konvolutivnih filtera i drugo.
+
+Dodatno znanje, u obliku negativnog znanja, može biti veoma bitan faktor u učenju i kreaciji modela koji imaju povećanu preciznost, pouzdanost i robustnost, pogotovo u teškim situacijama. Definišemo teške situacije kao one situacije u kojima je model suočen sa podacima koji su izmenjeni ili otežani na neki način, bilo na prirodan način ili veštački način. Na primer, modeli predstavljeni u ovom radu su testirani u slučajevima parcijalnih ulaza i okluzija gde su delovi ulaznih podataka odstranjeni ili zaklonjeni na neki način. Negativni modeli u ovakvim situacijama imaju znatno više performanse u poređenju sa običnim, tradicionalnim modelima iste arhitekture. Za veštački generisane situacije, govorićemo o adversarijalnim mrežama, podacima i napadima i kakve su performanse naših negativnih modela kada se suoče sa takvim podacima. Testirani su black-box i white-box adversarijalni napadi i odabrani su oni napadi koji danas predstavljaju najnaprednije moguće metode za namerna kvarenja modela dubokog učenja.
+
+U ovoj disertaciji takođe uvodimo pojam mreže sinergije, koja predstavlja spoj normalne i negativne mreže i kao takva se može koristiti i primeniti na bilo koji postojeći model. U sinergiji deo mreže ili cela mreža se dodaje na postojeći model u kombinaciji sa određenim modifikacijama kako bi se uključilo negativno duboko učenje. Pokazaćemo da ovakvi modeli imaju još više performanse u poređenju sa negativnim modelima i eksperimentisaćemo sa raznim načinima spajanja mreža. Model sinergije će biti testiran na CIFAR10 skupu podataka dok su negativni modeli razvijani i testirani na MNIST i EMNIST skupovima podataka.
+
+Na kraju, govorićemo o modelima koji koriste "pravo" negativno učenje, a to su oni modeli koji koriste samo negativno znanje za učenje. Biće dat prikaz postojećih sličnih modela kao što su Negative Sampling modeli, Noisy Label Classification modeli i modeli koji koriste Noise Contrastive Estimation. Naš fokus je na dva modela za koje ćemo predložiti i implementirati nadogradnje a to su: negativna Deep Q-Learning agentska neuronska mreža i negativna sijamska Triplet Loss mreža. Oba ova modela mogu biti korišćena uz pomoć samo negativnih podataka, u nekim slučajevima za potpuno treniranje a u nekim slučajevima kao vid regularizacije.
 
 \chapter{Abstract}
 
@@ -324,7 +336,7 @@ Lastly we mention true negative deep learning models, which are those which use 
 
 In the first part of this dissertation a short history of the field is presented with focus on some models and approaches used later to define and describe negative deep learning models. 
 
-Artificial intelligence is an universal field. Whether it is writing poetry, playing chess, proving theorems, self-driving cars or any other intellectual task, throughout history scientists have tried different artificial intelligence (AI) methods to bring the machines closer to us humans. Even though we think AI is the "new and hot" field in Computer Science, modern AI roots can be traced all the way to World War II. The name was coined after (in 1956) but the science was there long before that. From Alan Turing to Yann LeCun and others, generations have been working hard to bring the dream closer to reality -- a dream where machines can think, and reason. From the iconic Turing test to the deep neural networks, we have come long way but we still have loads to discover.
+Artificial intelligence is a universal field. Whether it is writing poetry, playing chess, proving theorems, self-driving cars or any other intellectual task, throughout history scientists have tried different artificial intelligence (AI) methods to bring the machines closer to us humans. Even though we think AI is the "new and hot" field in Computer Science, modern AI roots can be traced all the way to World War II. The name was coined after (in 1956) but the science was there long before that. From Alan Turing to Yann LeCun and others, generations have been working hard to bring the dream closer to reality -- a dream where machines can think, and reason. From the iconic Turing test to the deep neural networks, we have come long way but we still have loads to discover.
 
 \section{History of Artificial Intelligence}
 
@@ -538,12 +550,48 @@ It is important to mention that federated learning is not the same term as distr
 
 Federated learning technique is used a lot for online learning (additional training for existing models) as well as for critical systems where privacy is a priority. Some examples include self-driving cards, Industry 4.0 use-cases (smart manufacturing processes), medicine and others. \cite{arapakis2019towards} Federated learning is also accelerated by recent hardware developments both in ARM chips and in network infrastructure like 5G broadband networking.
 
+\chapter{Goals and contributions of this thesis}
+
+%Ciljevi disertacije, Doprinosi disertacije i Plan realizacije.
+
+In this chapter we briefly present the reader with goals and motivation as well as contributions and the realization plan of this PhD thesis. 
+
+\section*{Goals and motivation}
+
+The main goal of this thesis is to explore negative learning application for Deep Learning models. Negative learning is present in every-day life and it is a known term in psychology and behaviour studies. With our research we are trying to create a bridge between symbolic understanding of patterns and the innate low interpretability of deep learning models. In other words, we are trying to extract or, more precisely, deduce additional knowledge from existing data, similar to what would a human do if presented with a certain task.
+
+Another goal of this thesis is to define and implement negative deep learning models so others can benefit from our work and use these models for various tasks. We will define several negative models from negative convolutional neural networks, synergy ensemble positive-negative networks, true negative networks (e.g. negative Siamese networks) and negative agents.
+
+For some of these models the goal is evaluate them in-depth in some use cases where we hope they would perform well. For negative and synergy models the goal is to have better performance with regard to robustness in difficult scenarios such as partial inputs, occlusions, adversarial attacks etc. 
+
+For other models the goal is to evaluate the possibility of training and using them with negative learning in mind.
+
+\section*{Contributions}
+
+The contributions of this PhD thesis can be divided in several categories.
+
+Broadly and most importantly, the introduction of negative deep learning as a new paradigm in Machine Learning research is a great contribution to all researchers in the field. 
+
+Our detailed in-depth explanations, examples and implementations of the presented models is also a great contribution to research. We also provide reproducible and tested environments in which our models can be tested and our results validated. Significant time was spent on various in-depth experiments with our presented models so that many questions from researchers wanting to experiment with our models are immediately answered. For example for our negative models which learn to classify on negative features we already experimented with different activation functions, layer freezing, transfer learning, fine-tuning, convolutional layer inversion and other approaches. For our negative reinforcement learning agents we already provide one example environment where these or similar agents can be tested.
+
+We also provide full source code and implementations for all the models and experiments presented in this thesis which we believe is a necessity in modern research.
+
+\section*{Realization plan}
+
+The realization plan and general development of the models and experiments in this thesis closely follows the the actual contents of the thesis.
+
+First, we provide a short introduction and overview of the field necessary for defining negative deep learning models. After that we will discuss possible implementations and provide some examples and their application. In the next part we go in-depth with our first negative learning model which can classify instances based on their missing features. We present all the different experiments that were performed and the results. In the fourth part we discuss in-depth the Synergy model, another negative deep learning model. Then, we examine what we call "true" negative deep learning models, models which only learn from negative data. The main focus is on our own: a negative Siamese Triplet Loss neural network. Finally, in the last part we discuss how negative deep learning can be used in agent environments and provide examples for both the agent and the environment.
+
+\section*{Note on Related Work sections}
+
+During the production of this PhD thesis it was decided that the related work discussion should be included in specific parts of the manuscript. Our feeling is that this is a more natural approach as this thesis aims to cover a wide variety of fields of Machine Learning research. Therefore, a singular related work section does not exist but it rather split into parts which follow the natural flow of the document.
+
 \part{Negative Learning}
 \chapter{Introduction to Negative Learning}
 
 In this part of the manuscript we define negative learning as a term taken from cognitive psychology and we describe ways of introducing it to the field of Deep Learning.
 
-Negative learning in psychology can be defined in many ways. One way to define it is learning with a negative reward or a penalty. This approach can be directly applied to agent-based algorithms like for example, Reinforcement Learning algorithms. Learning with a negative reward or penalty is described so that an agent can be penalized for its actions if they are deemed inadequate. For a self-driving car for example some actions can be seen as positive and some can be seen as negative. Positive action would be for example stopping at the stop sign, while a negative action can be crashing or speeding. When training these agents, it is necessary to do so with both positive and negative examples of behaviour. This approach takes inspiration directly from human behaviour. Children for example are often disciplined when behaving in a inappropriate way.
+Negative learning in psychology \cite{mcleod2007bf} \cite{staddon2003operant} can be defined in many ways. One way to define it is learning with a negative reward or a penalty. This approach can be directly applied to agent-based algorithms like for example, Reinforcement Learning algorithms. Learning with a negative reward or penalty is described so that an agent can be penalized for its actions if they are deemed inadequate. For a self-driving car for example some actions can be seen as positive and some can be seen as negative. Positive action would be for example stopping at the stop sign, while a negative action can be crashing or speeding. When training these agents, it is necessary to do so with both positive and negative examples of behaviour. This approach takes inspiration directly from human behaviour. Children for example are often disciplined when behaving in a inappropriate way.
 
 An algorithm which only uses negative samples for learning, hoping that if it knows all the actions which should not be taken, will be able to deduce the correct (positive) action, would be called a negative learning algorithm. It is difficult to say whether it is a good approach for an algorithm to only learn using negative samples. We will see in later sections that this is possible.
 
@@ -1337,7 +1385,7 @@ Ensemble Learning can also be used in Deep Learning. One good example is in the 
 
 Our synergy network \cite{milosevic2020synergy} described here takes inspiration from ensemble learning models and the Siamese neural network model. In synergy networks as we will see, we have two models working in parallel. These models share some weights and have the same architecture but one of them is a negative model while the other is the "positive" or a normal neural network model.
 
-% TODO ovaj chapter srediti malo, ili mozda pomeriti dole
+Some experiments with joining multiple networks in the synergy models \cite{jasmina} and partial input and adversarial input classification \cite{mihailo} were performed as parts of two offspring MSc theses written by Jasmina Gajčin and Mihailo Ilić in 2020. Even though results and implementations from those manuscripts were not used in this thesis I thank them for their contribution and work on these tasks and hope we continue our collaboration.
 
 \chapter{Synergy model}
 
@@ -1404,6 +1452,8 @@ The hyperparameters were also defined and are as follows:
 \end{itemize}
 
 We are aware that there are more performant, complex, deeper (and wider) models that can be used for this task, however we wanted to experiment with a model that we know can be improved and to do so without introducing more depth or width to the model. Our modifications to this model can be transferred to any CNN model, but this model was sufficient for our experiments because we want to show how to upgrade an existing model, without modifying its architecture. Later, we will also present results with modification of widely known ResNet18 \cite{he2016deep} model.
+
+One similar architecture that we later discovered can be found in \cite{ganin2015unsupervised} where a model of similar architecture to our Synergy network is presented. In that paper a model where one feature extractor is used with multiple classification layers afterwards is very similar to our Synergy network model. More interestingly, the authors suggest the use of GRL (Gradient Reversal Layer) in a non-negative learning paradigm, but rather for multi-domain feature normalization. This approach could be of interest to us and possibly applicable to our negative learning approach. We will definitely explore this model and GRL in more depth in the future.
 
 \subsection{Negating the features}
 \label{negation}
