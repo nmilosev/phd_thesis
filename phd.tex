@@ -552,11 +552,9 @@ Federated learning technique is used a lot for online learning (additional train
 
 \chapter{Goals and contributions of this thesis}
 
-%Ciljevi disertacije, Doprinosi disertacije i Plan realizacije.
-
 In this chapter we briefly present the reader with goals and motivation as well as contributions and the realization plan of this PhD thesis. 
 
-\section*{Goals and motivation}
+\section{Goals and motivation}
 
 The main goal of this thesis is to explore negative learning application for Deep Learning models. Negative learning is present in every-day life and it is a known term in psychology and behaviour studies. With our research we are trying to create a bridge between symbolic understanding of patterns and the innate low interpretability of deep learning models. In other words, we are trying to extract or, more precisely, deduce additional knowledge from existing data, similar to what would a human do if presented with a certain task.
 
@@ -566,7 +564,7 @@ For some of these models the goal is evaluate them in-depth in some use cases wh
 
 For other models the goal is to evaluate the possibility of training and using them with negative learning in mind.
 
-\section*{Contributions}
+\section{Contributions}
 
 The contributions of this PhD thesis can be divided in several categories.
 
@@ -576,13 +574,13 @@ Our detailed in-depth explanations, examples and implementations of the presente
 
 We also provide full source code and implementations for all the models and experiments presented in this thesis which we believe is a necessity in modern research.
 
-\section*{Realization plan}
+\section{Realization plan}
 
-The realization plan and general development of the models and experiments in this thesis closely follows the the actual contents of the thesis.
+The realization plan and general development of the models and experiments in this thesis closely follows the actual contents of the thesis.
 
 First, we provide a short introduction and overview of the field necessary for defining negative deep learning models. After that we will discuss possible implementations and provide some examples and their application. In the next part we go in-depth with our first negative learning model which can classify instances based on their missing features. We present all the different experiments that were performed and the results. In the fourth part we discuss in-depth the Synergy model, another negative deep learning model. Then, we examine what we call "true" negative deep learning models, models which only learn from negative data. The main focus is on our own: a negative Siamese Triplet Loss neural network. Finally, in the last part we discuss how negative deep learning can be used in agent environments and provide examples for both the agent and the environment.
 
-\section*{Note on Related Work sections}
+\section{Note on Related Work sections}
 
 During the production of this PhD thesis it was decided that the related work discussion should be included in specific parts of the manuscript. Our feeling is that this is a more natural approach as this thesis aims to cover a wide variety of fields of Machine Learning research. Therefore, a singular related work section does not exist but it rather split into parts which follow the natural flow of the document.
 
@@ -846,7 +844,9 @@ At this point we explained how and why the features are negated. We also mention
 
 \subsubsection{Detecting relevant features per-class for negation}
 
-In this section, we propose the solution for finding relevant features per class. These selected features can be used for negation while the other irrelevant features are not modified. Similarly to convolutional activation atlases we want to find what features are activated (their activation value is above a certain threshold) for specific classes of images. With our modified training process this can be achieved in the following way. When the "pre-training" step of the process where the normal network is trained and convolutional layers are obtained we can use this model before discarding parts of it to extract what features (here output of the convolutional block) are important per class. The number of features is finite and they are used as a one dimensional tensor which is then passed as input to the fully-connected layers. For each class we remember all the activations indices which we obtain with forward passes through the network. Then, these indices are remembered and used for negation during training. It is important to say that these indices can only be used during training and not during testing. This is because to select certain features we have to know the correct class which is not available during testing. This way of feature negation is a good candidate for a substantial upgrade to the negative features model and will be further examined in the future work.
+In this section, we propose an idea for a solution for finding relevant features per class. These selected features can be used for negation while the other irrelevant features are not modified. Similarly to convolutional activation atlases we want to find what features are activated (their activation value is above a certain threshold) for specific classes of images during training. With our modified training process this can be achieved in the following way. 
+
+When the "pre-training" step of the process where the normal network is trained and convolutional layers are obtained we can use this model before discarding parts of it to extract what features (here output of the convolutional block) are important per class. The number of features is finite and they are used as a one dimensional tensor which is then passed as input to the fully-connected layers. For each class we remember all the activations indices which we obtain with forward passes through the network. Then, these indices are remembered and used for negation during training. It is important to say that these indices can only be used during training and not during testing. This is because to select certain features we have to know the correct class which is not available during testing. This is an issue which has to be considered in the future, because we want the model to behave the same in the training and testing phases. We will revisit this idea in the future work and validate our assumptions.
 
 \section{Training process}
 
@@ -1355,20 +1355,20 @@ We experimented with black-box PGD attack where we gave it all of our five model
 
 \begin{table}[ht]
   \centering
-  \begin{tabular}{l|ccccc|c}
+  \begin{tabular}{l|ccccc}
     \toprule
-     \textit{Holdout/Target} & SN & ONN & HN & NR & ALT & {Avg. acc.} \\
+     \textit{Holdout/Target} & SN & ONN & HN & NR & ALT \\
     \midrule
-     SN & \textit{{29.28}} & {54.86} & {52.67} & {57.80} & {60.95} & {56.57} \\
-     ONN & {52.62} & \textit{{33.33}} & {56.14} & {58.05} & {62.38} & {57.29} \\
-     HN & {48.58} & {53.83} & \textit{{31.68}} & {56.74} & {56.61} & {53.94} \\
-     NR &{51.31} & {53.62} & {54.75} & \textit{{35.81}} & {59.27} & {54.73}\\ 
-     ALT & {50.56} & {54.38} & {51.01} & {55.22} & \textit{{37.70}} & {52.79}\\
+     SN & \textit{{29.28}} & {54.86} & {52.67} & {57.80} & {60.95} \\
+     ONN & {52.62} & \textit{{33.33}} & {56.14} & {58.05} & {62.38}  \\
+     HN & {48.58} & {53.83} & \textit{{31.68}} & {56.74} & {56.61} \\
+     NR &{51.31} & {53.62} & {54.75} & \textit{{35.81}} & {59.27} \\ 
+     ALT & {50.56} & {54.38} & {51.01} & {55.22} & \textit{{37.70}} \\
     \midrule 
      Avg. acc. & {44.47} & {50.00} & {49.25} & {52.72} & {55.39} \\
     \bottomrule
   \end{tabular}
-  \caption{Results with accuracy for all models against PGD black-box attack. On the diagonal in italic font are the actual PGD white-box attack accuracies (same Holdout and Target model). We can see more severe damage caused by PGD in these cases. These results are taken for the middle epsilon value: \(\epsilon = 0.15 \). In the last column we can see the average accuracy for models when using PGD as a black-box attack (accuracy for the white-box attack omitted) where the negative network performs best. The last row presents average accuracies when using different models as target models, where we see again the negative models outperforming the normal model. The results are generally better for greater \(\epsilon\) values. Full results are available in the code repository.}
+  \caption{Results with accuracy for all models against PGD black-box attack. On the diagonal in italic font are the actual PGD white-box attack accuracies (same Holdout and Target model). We can see more severe damage caused by PGD in these cases. These results are taken for the middle epsilon value: \(\epsilon = 0.15 \). The last row presents average accuracies when using different models as target models, where we see again the negative models outperforming the normal model. The results are generally better for greater \(\epsilon\) values. Full results are available in the code repository.}
   \label{tab:results-pgd}
 \end{table} 
 
@@ -1757,6 +1757,46 @@ Several upgrades to this process are possible.
 
 One upgrade would be to use a hyperparameter \( \omega = \) "importance of negative network"  which would control how both probabilities are taken into count when doing addition. With this parameter we can control the importance of both models, which could be useful in some scenarios where one network heavily outperforms the other one. If we are using this parameter the addition formula we mentioned before would be slightly different, in that the probabilities output from the negative network would be multiplied with the hyperparameter value: \( p(c0) = p_p(c0) + p_n(c0) * \omega \)
 
+We have experimented with several values for the $ \omega $ hyperparameter. For this dataset/model combination the parameter does not seem to bring large differences in the results as can be seen in Table \ref{tab:omega05} and Table \ref{tab:omega20}. We will continue to experiment with this hyperparameter in the future, especially with regression tasks.
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models when testing with $\omega = 0.5$. With this parameter value the normal network is two times more important than the negative network in the join process.}
+\label{tab:omega05}
+\tabcolsep=0.06cm
+\begin{tabular}{lccccc}
+\hline\noalign{\smallskip}
+\emph{Model/Dataset} & Unmod. & SSK & SSKR & MSK & MSKR \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 62.63 & 52.60 & 52.20 & 59.15 & 47.15 \\
+Negative & 63.53 & 51.63 & 53.63 & 60.31 & 45.67 \\
+Synergy & \textbf{66.28} & \textbf{55.82} & 55.79 & \textbf{62.98} & \textbf{50.63} \\
+Trained Synergy & 63.70 & 55.48 & \textbf{56.76} & 60.95 & 47.93 \\
+Trained Synergy (h.s.) & 64.46 & 54.05 & 54.89 & 60.65 & 47.31 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\centering
+\caption{Validation accuracies of the models when testing with $\omega = 2.0$ where the negative network is twice the important when comparing it with the normal network.}
+\label{tab:omega20}
+\tabcolsep=0.06cm
+\begin{tabular}{lccccc}
+\hline\noalign{\smallskip}
+\emph{Model/Dataset} & Unmod. & SSK & SSKR & MSK & MSKR \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+Normal & 62.36 & 52.46 & 51.66 & 58.69 & 47.45 \\
+Negative & 62.95 & 51.97 & 53.37 & 60.22 & 46.14 \\
+Synergy & \textbf{65.76} & \textbf{55.46} & 55.68 & \textbf{62.15} & \textbf{49.32} \\
+Trained Synergy & 63.15 & 52.63 & \textbf{56.79} & 58.79 & 44.52 \\
+Trained Synergy (h.s.) & 63.51 & 53.20 & 52.50 & 59.65 & 46.82 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+
+
 Another upgrade would be to divide the resulting probabilities with a number of networks from which they are sourced. This is not necessary if we are doing addition at the end of the model, since it is very likely that an \( argmax \) operation would be used for a final predictions. If however we need the final probabilities or they have to be used further in the model pipeline we would need to perform this normalization process: \( p(c0) = (p_p(c0) + p_n(c0)) / 2 \).
 
 \subsection{Multiplication}
@@ -1965,7 +2005,7 @@ The results can be seen in Table \ref{tab:results-others-synergy}, default hyper
   \centering
   \begin{tabular}{l|cc|c}
     \toprule
-     \textit{Attack/Target} & {SN} & {Synergy} & Delta \\
+     \textit{Attack/Target} & {Synergy} & {Normal} & Delta \\
     \midrule
     {PGD \cite{madry2017towards}} & {32.56} & {31.12} & {1.44} \\
     {BIM \cite{kurakin2016adversarial}} & {32.90} & {31.39} & {1.51} \\
