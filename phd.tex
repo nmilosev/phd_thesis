@@ -274,9 +274,7 @@ In Part 3 we introduce the first negative learning model which can classify inst
 
 In Part 4 we discuss an interesting characteristic of the previous model we discovered and how it led us to develop the Synergy model -- another negative deep learning model. We validate our assumptions again with various experiments and results
 
-In Part 5 we discuss what we call "true" negative deep learning models, models which only learn from negative data. We discuss existing approaches and showcase our own: a negative Siamese Triplet Loss neural network.
-
-Finally, in Part 6 we discuss how negative deep learning can be used in agent environments and provide one example environment where the agent's behaviour can be controlled only with negative rewards (punishments).
+In Part 5 we discuss what we call "true" negative deep learning models, models which only learn from negative data. We discuss existing approaches and showcase our own: a negative Siamese Triplet Loss neural network. Finally, we discuss how negative deep learning can be used in agent environments and provide one example environment where the agent's behaviour can be controlled only with negative rewards (punishments).
 
 \section*{Acknowledgements}
 
@@ -578,7 +576,7 @@ We also provide full source code and implementations for all the models and expe
 
 The realization plan and general development of the models and experiments in this thesis closely follows the actual contents of the thesis.
 
-First, we provide a short introduction and overview of the field necessary for defining negative deep learning models. After that we will discuss possible implementations and provide some examples and their application. In the next part we go in-depth with our first negative learning model which can classify instances based on their missing features. We present all the different experiments that were performed and the results. In the fourth part we discuss in-depth the Synergy model, another negative deep learning model. Then, we examine what we call "true" negative deep learning models, models which only learn from negative data. The main focus is on our own: a negative Siamese Triplet Loss neural network. Finally, in the last part we discuss how negative deep learning can be used in agent environments and provide examples for both the agent and the environment.
+First, we provide a short introduction and overview of the field necessary for defining negative deep learning models. After that we will discuss possible implementations and provide some examples and their application. In the next part we go in-depth with our first negative learning model which can classify instances based on their missing features. We present all the different experiments that were performed and the results. In the fourth part we discuss in-depth the Synergy model, another negative deep learning model. Then, we examine what we call "true" negative deep learning models, models which only learn from negative data. The main focus is on our own: a negative Siamese Triplet Loss neural network. Finally, in the last part we also discuss how negative deep learning can be used in agent environments and provide examples for both the agent and the environment.
 
 \section{Note on Related Work sections}
 
@@ -1974,7 +1972,7 @@ In the Table \ref{tab:results-pgd-synergy} we can see the results when testing t
     \midrule
     {} & {White-box} & {Black-box} & {Black-box} & {White-box} & {} \\
     \midrule
-    {con. 0.0} & {58.07} & {62.86}  & {58.07} & {62.86} & {4.79} \\
+    {con. 0.0} & {58.07} & {62.86}  & {58.07} & {62.86} & {-} \\
     {0.005} & {31.12} & {41.24}  & {37.28} & {32.56} & {3.96} \\
     {0.01} & {18.24} & {28.32}  & {25.77} & {17.84} & {2.55} \\
     {0.02} & {2.42} & {6.71}  & {6.76} & {2.84} & {-0.05} \\
@@ -2032,10 +2030,35 @@ We have also considered combining our models with newer neural architecture sear
 Additionally, we want to experiment with more state of the art (e.g. \cite{he2016deep,huang2017densely,xie2017aggregated}) models which achieve very high accuracy on the CIFAR-10 and ImageNet \cite{deng2009imagenet} datasets. While our work in this paper focused on a simpler and easier to train model, we believe that the modifications described in this paper can also further improve even the most complex models of today. We are also eager to try our approach in regression tasks and we are already familiar with some application that could benefit from this approach \cite{pecev2016system,pecev2017ltr}.
 
 \part{True Negative Deep Learning}
+
+In this part of this PhD thesis we mainly present discussion and ideas for other, pure, negative deep learning models. While many of these models are still in their inception phase, we believe this path of research will yield in useful models for wide variety of scenarios. We will also demonstrate two proof-of-concept implementations which we developed: A negative Siamese Triplet-Loss Neural Network and a negative Deep Reinforcement Learning (DQN) agent. Other models mentioned in this part of the thesis are either our ideas for future work or some approaches we believe are related or can be modified slightly to employ negative learning.
+
 \chapter{Goals, motivation and implementations}
 In previous parts of this dissertation we described and focused on some specific models of negative learning which use special feature representations in order to deduce the output class in classification tasks. In this part we will discuss potential and existing implementations of "true negative learning". With the term true negative learning we consider models which do not use special feature representation but rather modified data and/or training process to implement negative learning. In other words these model learn by recognizing patterns in the form of what is not the output class based on the input data, where our models used unmodified input data for a similar purpose. There exist several models which implement similar patterns and we will discuss them in this part of the manuscript.
 
 Goals of the true negative deep learning model is similar to the models we have already seen. To learn additional information about the data based on negative patterns in the data which can be missing information or the actual negative labels (e.g. what something is not in classification tasks). This way of learning can be implemented in several ways and there are already several models which use something similar. In this chapter we will mention two groups of true negative deep learning models. The first group is the models which work by modifying the dataset (negative sampling) and the second group is the models which are using other techniques (e.g. loss function modifications).
+
+\section{Gradient Ascent Variation}
+
+Firstly we mention Gradient Ascent as the main idea behind "true negative learning" models. Gradient Ascent is a known modification of the Gradient Descent optimization algorithm. 
+
+In Gradient Descent (and its variations, eg. Stochastic Gradient Descent) a model is optimized by minimizing the value of a certain loss function which describes how the model is performing. The loss function is formulated so that the output value is higher for higher error rate, or in other words the smaller the value the better the model is performing. In some literature this process of minimization of the loss function is called "walking the gradient" which explains the iterative nature of the algorithm (small steps towards the minimum of the loss function).
+
+Gradient Ascent is very similar to Gradient Descent but with one major modification in that we walk the gradient uphill, maximizing the loss function. 
+
+Making the loss function output higher values may look like simply trying to modify the model weights so the error rate is higher, and this is true to some extent. We have already seen several examples where Gradient Ascent is used in adversarial attacks, FGSM attack for example. But Gradient Ascent, we believe, can also be used for negative learning, in combination with Gradient Descent. We will now describe how we think this can be achieved.
+
+This neural network model can be trained in two ways: normally until the model converges and no further updates yield better performance and then fine-tuning it with negative learning, or, by incorporating negative learning during the main training process. 
+
+We would need negative input samples, which in a m-ary classification problem would be inputs for which we know they do not belong to a specific class (or a set of classes). In image classification problems for example, we would define a negative input sample as an image or a specific part of the image for which we want to tell our model to specifically care about not belonging to a specific class. One good example can be seen in the Figure \ref{fig:sample-motivation} which we used to introduce the CBOMF model in previous parts of this thesis. There, the presented missing features are a good candidate to use as negative input patterns because for these patterns we know specifically to which class they do not belong. When a negative pattern is presented to the model we would use Gradient Ascent to reduce the weights and biases of the network leading to the negative output class. In other words, we would walk uphill on the gradient away from the output class, or "pull away" from it. 
+
+This learning step can be achieved in at least three ways which are simple to implement. We already mentioned the first way, which is to use gradient ascent without further modification to the data. Secondly, we could invert the desired output of the negative pattern. The output in the classification task would be an inverted vector where we would have the opposite values of the one-hot vector used during training. If done so, the weights and biases are changed during training so that the parameters leading to the negative output class are reduced and the parameters leading to other classes are increased. The third way to achieve this is to invert the gradients during training with negative samples, without changes to the data. This can be achieved by employing negative learning rate values or by specifically negating the gradients in the backwards pass.
+
+We would like to emphasize that the main goal for these models is, similarly to other negative models, to achieve higher performance by providing additional knowledge. Here, this additional knowledge would be specific negative input patterns which exist naturally or are synthetically made to aid the network. For example, if we have a model which often misclassifies two specific classes we could provide additional negative samples so the network learns that if a certain pattern is observed in the input sample what the output class is not. 
+
+We present this model only as an idea in this thesis, hoping to implement it and evaluate it at a future time. While the implementation would be moderately difficult, the main task or issue is finding a suitable dataset or manually creating negative input samples. An useful idea there is that it is perhaps possible to generate negative samples by randomly selecting parts of the input patterns while also randomly choosing a negative class to which they do not belong. Problem with this approach is the randomness of the process which would bring instability. For example, we cannot be sure that the randomly chosen input pattern is important for a specific class just as we cannot be sure that the input pattern is a "negative" example for some other class. One somewhat similar approach is presented in the following sections. 
+
+In our Negative Triplet-Loss Siamese model we will see a similar approach to the Gradient Ascent we mention here. In Siamese models it is easier to control the negative learning process as it is built in the model by using metric (similarity) learning.
 
 \section{Negative sampling}
 
@@ -2065,7 +2088,13 @@ One example would be in the next-word prediction tasks in which given a part of 
 
 NCE models work differently in that they do not learn how to classify (this task can be looked upon like it is multi-class classification problem) but rather how to separate actual word pairs (word that are supposed to be together, positive samples) from the noisy pairs (negative samples). This is achieved by creating positive and negative input samples, where positive samples are all of the same lenght which is much shorter than the vocabulary and contain words found often together in the input text dataset. Negative samples are formed in the opposite way: words which are rarely used together are formed as negative samples. For NCE models it is very important to define the \(window\_size\) parameter which is used to define the length of the input data. NCE uses negative sampling to choose random words for the creation of negative input samples but some variants also use words least frequently used in pairs as an additional regularization technique (word2vec \cite{mikolov2013efficient}).
 
-Most notable implementation of this algorithm is in the unsupervised learning word2vec \cite{mikolov2013efficient} algorithm. In this algorithm this method is used to generate word embeddings in a multidimensional space where words which are used together have similar embeddings -- they are close in the vector space. 
+Most notable implementation of this algorithm is in the unsupervised learning word2vec \cite{mikolov2013efficient} algorithm. In this algorithm this method is used to generate word embeddings in a multidimensional space where words which are used together have similar embeddings -- they are close in the vector space. One example can be seen in Figure \ref{fig:word2vec}.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{figures/word2vec.png}    \caption{2-D space of English words generated with word2vec. Words with similar semantic meaning are close in the embedding space.}
+    \label{fig:word2vec}
+\end{figure}
 
 The basic idea is to convert a multinomial classification problem (as it is the problem of predicting the next word) to a binary classification problem. That is, instead of using softmax to estimate a true probability distribution of the output word, a binary logistic regression (binary classification) is used instead.
 
@@ -2073,11 +2102,6 @@ For each training sample, the classifier is fed a true pair (a center word and a
 
 word2vec \cite{mikolov2013efficient} slightly customizes the process and calls it negative sampling. In word2vec, the words for the negative samples (used for the corrupted pairs) are drawn from a specially designed distribution, which favours less frequent words to be drawn more often.
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.2]{figures/word2vec.png}    \caption{2-D space of English words generated with word2vec. Words with similar semantic meaning are close in the embedding space.}
-    \label{fig:word2vec}
-\end{figure}
 
 
 \chapter{Siamese Neural Networks and our upgrades}
@@ -2167,11 +2191,7 @@ In our second experiment we decided to see if this approach can be used as a fin
     \label{fig:snn_chart}
 \end{figure}
 
-
-
-\part{Negative Deep Learning in Agent Environments}
-
-\chapter{Deep Reinforcement Learning}
+\chapter{Negative Deep Reinforcement Learning}
 
 In this part of the dissertation we discuss negative learning suitable for agent environments, namely with Deep Reinforcement Learning algorithms.
 
