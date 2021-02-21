@@ -385,7 +385,7 @@ In Figure \ref{fig:dnn_classify} we can see a simplified diagram of how a deep n
 \begin{figure}
     \centering
     \includegraphics[scale=0.5]{figures/image-classification.png}
-    \caption{Image Classification Deep Neural Network @@@IAN}
+    \caption{Image Classification Deep Neural Network. Original source: \cite{goodfellow2016deep}}
     \label{fig:dnn_classify}
 \end{figure}
 
@@ -587,7 +587,7 @@ During the production of this PhD thesis it was decided that the related work di
 
 In this part of the manuscript we define negative learning as a term taken from cognitive psychology and we describe ways of introducing it to the field of Deep Learning.
 
-Negative learning in psychology \cite{mcleod2007bf} \cite{staddon2003operant} can be defined in many ways. One way to define it is learning with a negative reward or a penalty. This approach can be directly applied to agent-based algorithms like for example, Reinforcement Learning algorithms. Learning with a negative reward or penalty is described so that an agent can be penalized for its actions if they are deemed inadequate. For a self-driving car for example some actions can be seen as positive and some can be seen as negative. Positive action would be for example stopping at the stop sign, while a negative action can be crashing or speeding. When training these agents, it is necessary to do so with both positive and negative examples of behaviour. This approach takes inspiration directly from human behaviour. Children for example are often disciplined when behaving in a inappropriate way.
+Negative learning in psychology \cite{mcleod2007bf,staddon2003operant} can be defined in many ways. One way to define it is learning with a negative reward or a penalty. This approach can be directly applied to agent-based algorithms like for example, Reinforcement Learning algorithms. Learning with a negative reward or penalty is described so that an agent can be penalized for its actions if they are deemed inadequate. For a self-driving car for example some actions can be seen as positive and some can be seen as negative. Positive action would be for example stopping at the stop sign, while a negative action can be crashing or speeding. When training these agents, it is necessary to do so with both positive and negative examples of behaviour. This approach takes inspiration directly from human behaviour. Children for example are often disciplined when behaving in a inappropriate way.
 
 An algorithm which only uses negative samples for learning, hoping that if it knows all the actions which should not be taken, will be able to deduce the correct (positive) action, would be called a negative learning algorithm. It is difficult to say whether it is a good approach for an algorithm to only learn using negative samples. We will see in later sections that this is possible.
 
@@ -1403,7 +1403,7 @@ In our previous work \cite{milovsevic2019classification} we showed that by using
 
 To overcome the loss of knowledge we discovered, we create an ensemble model of two networks, one traditional and one negative. Both networks have the same architecture and share the convolutional, feature extraction layers. As we discussed in previous parts, we want to use the convolutional layers from the traditional model, so that we know it is our modification of the learning process that leads us to accuracy gains. This required some effort to make sure that our training process is deterministic and also that some of the weights are shared between models. To clarify, the shared parameters between the models are the frozen convolutional layers obtained from an unmodified neural network. The usage of negative models without shared parameters has also been tested, but it is incomparable to the unmodified models because the convolutional layers (namely filter weights) are completely different. Since we want to focus on models that use classification based on negative features, we want to make sure that the feature extraction parts of the networks remain unchanged in all the testing scenarios.
 
-A simplified architecture diagram can be seen in Figure 1. The convolutional layers are shared while there are two sets of classification layers we are training. On the left, a normal unmodified set of layers is trained while on the right we have a feature negation operation before the fully connected layers. We refer to the left side of the network as the positive side and the right side of the network as the negative side. The negation of the feature embedding vector is explained in Section \ref{negation}.
+A simplified architecture diagram can be seen in Figure \ref{fig:1}. The convolutional layers are shared while there are two sets of classification layers we are training. On the left, a normal unmodified set of layers is trained while on the right we have a feature negation operation before the fully connected layers. We refer to the left side of the network as the positive side and the right side of the network as the negative side. The negation of the feature embedding vector is explained in Section \ref{negation}.
 
 % For one-column wide figures use
 \begin{figure}
