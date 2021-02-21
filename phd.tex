@@ -2330,13 +2330,19 @@ We would also like to experiment with several of the negative learning process u
 \chapter{Source code and Reproducibility}
 \label{source}
 
-The source code for our models and the training processes can be found on the following link: 
+The source code for our models and the training processes can be found on the following links: 
 
-\begin{footnotesize}
-\url{github.com/nmilosev/phd}
-\end{footnotesize}
+\begin{itemize}
+    \item \url{github.com/nmilosev/phd_thesis} - Manuscript
+    \item \url{github.com/nmilosev/negative-learning} - Classification Based On Missing Features models
+    \item \url{github.com/nmilosev/negative-learning-synergy} - Synergy models
+    \item \url{github.com/nmilosev/phd_additions} - All the additional experiments for the CBOMF and Synergy models, Negative Siamese models, Negative Q-Learning models
+    
+\end{itemize}
 
-We have taken some additional steps with the used libraries and tools so that our results are reproducible and testable in many different environments.
+We have taken some additional steps with the used libraries and tools so that our results are reproducible, deterministic and testable in many different environments.
+
+We recommend running the code experiments in a Docker \cite{merkel2014docker} environment using PyTorch official images (e.g. \lstinline{pytorch/pytorch:1.7.1-cuda11.0-cudnn8-runtime}).
 
 \backmatter
 
