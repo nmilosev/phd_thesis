@@ -1,4 +1,4 @@
-%% Nemanja Milosevicr
+%% Nemanja Milosevic
 %% phd text
 
 %% feel free to reuse parts (or all) of the formating
@@ -385,7 +385,7 @@ In Figure \ref{fig:dnn_classify} we can see a simplified diagram of how a deep n
 \begin{figure}
     \centering
     \includegraphics[scale=0.5]{figures/image-classification.png}
-    \caption{Image Classification Deep Neural Network. Original source: \cite{goodfellow2016deep}}
+    \caption{Image Classification Deep Neural Network. Original source: \cite{goodfellow2016deep}.}
     \label{fig:dnn_classify}
 \end{figure}
 
@@ -449,7 +449,7 @@ One important RNN model to mention is the Sequence-To-Sequence model (seq2seq \c
 
 One issue that recurrent neural networks have due to the vanishing gradient phenomena \cite{hochreiter1998vanishing} it is very difficult for them to take into consideration states from many time steps before. Two successful approaches to this problems are the gated recurrent unit (GRU) \cite{chung2014empirical} model and the long short-term memory (LSTM) \cite{hochreiter1997long} model. Both of these architectures use gates or self-loops to produce paths where gradients can flow for a long period of time. LSTM model especially has found great success in tasks like unconstrained handwriting recognition, speech recognition, handwriting generation, machine translation, image captioning and parsing. \cite{goodfellow2016deep}
 
-Neural networks are very good at learning implicit connection in the data, but they lack in the simple task of memorizing of facts. This is due to SGD (stochastic gradient descent) requirement of many presentation of some input before it can be stored in a way in the network parameters. Even stored, the input will not be kept with high precision. Human beings are known to memorize facts though a "working memory" system (\cite{graves2014neural}). The need for a model that can process information as a sequence of steps (recurrent models) was clear and in \cite{weston2014memory} Weston et. al. introduced memory networks that include a set of memory cells. Memory networks, at first, required supervised signal to know how to use their memory cells, but in \cite{graves2014neural} Graves et. al. introduced Neural Turing machines \cite{graves2014neural} which were able to learn whether to write or read data from memory cells without supervision. This allowed self-contained end-to-end memory training with the use of content-based soft attention mechanism. This attention mechanism has become standard way of introducing memory to recurrent neural network models.
+Neural networks are very good at learning implicit connection in the data, but they lack in the simple task of memorizing of facts. This is due to SGD (stochastic gradient descent) requirement of many presentation of some input before it can be stored in a way in the network parameters. Even stored, the input will not be kept with high precision. Human beings are known to memorize facts though a "working memory" system (\cite{graves2014neural}). The need for a model that can process information as a sequence of steps (recurrent models) was clear and Weston et. al. introduced memory networks \cite{weston2014memory} that include a set of memory cells. Memory networks, at first, required supervised signal to know how to use their memory cells, but Graves et. al. introduced Neural Turing machines \cite{graves2014neural} which were able to learn whether to write or read data from memory cells without supervision. This allowed self-contained end-to-end memory training with the use of content-based soft attention mechanism. This attention mechanism has become standard way of introducing memory to recurrent neural network models.
 
 \section{Generative Models}
 
@@ -464,7 +464,7 @@ Another area where generative models excel is image processing. DeepDream \cite{
 \begin{figure}
     \centering
     \includegraphics[scale=0.2]{figures/deepdream.png}
-    \caption{Example of a DeepDream network output image. Taken from \cite{chollet2018deep}.}
+    \caption{Example of a DeepDream network output image. Original image source: \cite{chollet2018deep}.}
     \label{fig:deepdream}
 \end{figure}
 
@@ -488,7 +488,7 @@ In this formula distance function is a norm function such as the L2 norm, conten
 
 Another popular generative method is the Variational Autoencoder (VAE) \cite{chollet2018deep} model. Autoencoders are a special type of neural networks where the input and the output are identical. The benefit of these models comes from their architecture. All autoencoders have such structures that the input is reduced in size until one point in the network and then increased in the next. These two parts of the model are called the encoder and the decoder and the middle point in the network is called the bottleneck. When a model like this is trained it is forced to learn a compressed representation of the input so it can use that representation to decompress it and produce that input again as the output. Autoencoders can also be used for clustering \cite{chollet2018deep}, anomaly detection \cite{an2015variational} and many other unsupervised tasks -- in which traditionally neural networks are not used. 
 
-Autoencoders are also generative models. \cite{kusner2017grammar} \cite{pu2016variational} If we take the decoder part and feed it some random inputs, we will get an output of some sorts which would be similar to some parts of our training dataset. This way of sampling from latent space of images for example to create new images or modify existing images is one of the most popular and successful applications of generative models today. We mentioned latent space and we define it as a low-dimensional vector space where any point can be mapped to a realistic-looking image. When we create this latent space we can sample from it, deliberately or at random and the output becomes a previously unseen input (image). VAEs learn latent spaces that are well structured where specific directions in the multidimensional vector space encode meaningful variations in data. If we train a VAE with a dataset of portraits for example, one such direct would be hair color or whether the person in the image is smiling. \cite{hou2017deep} At the end we need to emphasize differences between traditional autoencoder models and the variational autoencoder model mentioned here. VAEs differ from normal AEs in that we impose various constrains on the latent space definition so we force the model to learn better representations of features found in input data. For example we can limit the latent space to be low-dimensional and sparse, forcing the model to learn better. When comparing latent spaces of normal AEs and VAEs it is apparent that VAEs have better defined structure. This is because VAEs in addition to compressing input data into a fixed point in the latent space also turns the data into parameters of a statistical distribution (mean and variance). This means we assume that the input data has been generated by a statistical process and that the randomness of the process should be considered during encoding and decoding. The mean and variance parameters are then used to randomly sample one element of the distribution to decode that element to the input to the model. The randomness of this process improves both the latent space structure and continuity and the robustness of the whole process.
+Autoencoders are also generative models. \cite{kusner2017grammar,pu2016variational} If we take the decoder part and feed it some random inputs, we will get an output of some sorts which would be similar to some parts of our training dataset. This way of sampling from latent space of images for example to create new images or modify existing images is one of the most popular and successful applications of generative models today. We mentioned latent space and we define it as a low-dimensional vector space where any point can be mapped to a realistic-looking image. When we create this latent space we can sample from it, deliberately or at random and the output becomes a previously unseen input (image). VAEs learn latent spaces that are well structured where specific directions in the multidimensional vector space encode meaningful variations in data. If we train a VAE with a dataset of portraits for example, one such direct would be hair color or whether the person in the image is smiling. \cite{hou2017deep} At the end we need to emphasize differences between traditional autoencoder models and the variational autoencoder model mentioned here. VAEs differ from normal AEs in that we impose various constrains on the latent space definition so we force the model to learn better representations of features found in input data. For example we can limit the latent space to be low-dimensional and sparse, forcing the model to learn better. When comparing latent spaces of normal AEs and VAEs it is apparent that VAEs have better defined structure. This is because VAEs in addition to compressing input data into a fixed point in the latent space also turns the data into parameters of a statistical distribution (mean and variance). This means we assume that the input data has been generated by a statistical process and that the randomness of the process should be considered during encoding and decoding. The mean and variance parameters are then used to randomly sample one element of the distribution to decode that element to the input to the model. The randomness of this process improves both the latent space structure and continuity and the robustness of the whole process.
 
 \subsection{Adversarial Learning}
 
@@ -761,7 +761,7 @@ We did not want to limit ourselves to only one validation set because it is diff
 \begin{figure}[!ht]
   \centering
   \includegraphics[scale=0.5, trim=0pt 0pt 0pt 0pt, clip]{datasetimages} 
-  \caption{Example of digit 3 in our validation set; From left to right: unmodified -- original version, horizontally cut image -- top half removed, vertically cut image -- left half removed, diagonally cut image -- first and third quadrants removed, "triple cut" image -- three squares removed as described before}
+  \caption{Example of digit 3 in our validation set; From left to right: unmodified -- original version, horizontally cut image -- top half removed, vertically cut image -- left half removed, diagonally cut image -- first and third quadrants removed, "triple cut" image -- three squares removed as described before.}
   \label{fig:dsexamples}
 \end{figure}
 
@@ -878,7 +878,7 @@ The training is then continued on for another 10 epochs, making it 20 epochs in 
 
 For most of here mentioned models we use freezing of convolutional kernels. Freezing is a process of setting convolutional layers as fixed, constant values after they have been learned. The freezing of the convolutional layers is important from the analysis standpoint as we want to test our model modifications which are currently after the convolutional blocks. If we were not to freeze the convolutional layers, they would change their parameters during training -- and this is not desired behaviour. 
 
-Freezing of the layers is a procedural process where one has to iterate through convolutional filter parameters (conv. kernels) and mark them as constant. In the PyTorch framework this is done with the "requires\_grad" field.
+Freezing of the layers is a procedural process where one has to iterate through convolutional filter parameters (convolutional kernels) and mark them as constant. In the PyTorch framework this is done with the \lstinline{requires_grad} field.
 
 Freezing of the convolutional layers (or other parts of a neural network models) is a common technique when using pre-trained models. The idea behind pre-trained models is simple: a model trained on a dataset (usually large, not easy to retrain) is extended with few layers on top to be used for some different task. One example where this approach is popular is with image classification. There, it is common to use very deep and complex models trained on the ImageNet Dataset as frozen feature extractors. In addition, a simple fully-connected neural network is added "on-top" of the ImageNet model and trained to classify custom image datasets.
 
@@ -1128,7 +1128,7 @@ Presented results are for the MNIST/PMNIST dataset. Experiments have been perfor
     \bottomrule
   \end{tabular}
   %
-  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( sigmoid \) activation function}
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( sigmoid \) activation function.}
   \label{tab:results-sigmoid}
 \end{table} 
 
@@ -1148,7 +1148,7 @@ Presented results are for the MNIST/PMNIST dataset. Experiments have been perfor
     \bottomrule
   \end{tabular}
   %
-  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( tanh \) activation function}
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( tanh \) activation function.}
   \label{tab:results-tanh}
 \end{table} 
 
@@ -1168,7 +1168,7 @@ Presented results are for the MNIST/PMNIST dataset. Experiments have been perfor
     \bottomrule
   \end{tabular}
   %
-  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( ReLU6 \) activation function}
+  \caption{Results with accuracy for all models used on the PMNIST validation sets while using \( ReLU6 \) activation function.}
   \label{tab:results-relu6}
 \end{table} 
 
@@ -1227,7 +1227,7 @@ In addition to our previous experiments with removing parts of the image we deci
 \begin{figure}
     \centering
     \includegraphics[width=0.7\textwidth]{figures/fig3.png}
-\caption{Input example \#8 from CIFAR-10 validation set with various levels of occlusion added. From left to right: original image, \( 10\% \) removed, \( 20\% \) removed, \( 30\% \) removed}
+\caption{Input example \#8 from CIFAR-10 validation set with various levels of occlusion added. From left to right: original image, \( 10\% \) removed, \( 20\% \) removed, \( 30\% \) removed.}
 \label{fig:cbomf3} 
 \end{figure}
 
@@ -1277,7 +1277,7 @@ To evaluate our model robustness with regard to adversarial attack we first expe
 \begin{figure}
 \centering
   \includegraphics[width=1\textwidth]{figures/fgsm_panda_image.png}
-\caption{FGSM adversarial image generation process, \( \epsilon = 0.007 \) (image taken from original FGSM paper)}
+\caption{FGSM adversarial image generation process, \( \epsilon = 0.007 \) (image taken from original FGSM paper).}
 \label{fig:fgsmpanda}       % Give a unique label
 \end{figure}
 
@@ -1342,7 +1342,7 @@ The results of the experiment with various \( \epsilon \) values can be seen in 
         
     \end{axis}
     \end{tikzpicture}
-    \caption{Accuracy of normal and negative (best chosen) models against FGSM}
+    \caption{Accuracy of normal and negative (best chosen) models against FGSM.}
     \label{fig:fgsm_chart}
 \end{figure}
 
@@ -1412,7 +1412,7 @@ A simplified architecture diagram can be seen in Figure \ref{fig:1}. The convolu
 % For example, with the graphicx package use
   \includegraphics[width=0.4\textwidth]{figures/fig1.pdf}
 % figure caption is below the figure
-\caption{Synergy Model Architecture}
+\caption{Synergy Model Architecture.}
 \label{fig:1}       % Give a unique label
 \end{figure}
 
@@ -1476,7 +1476,7 @@ The conclusion that an improvement is possible came from a simple experiment we 
 
 \begin{table}
 \centering
-\caption{Performance of the negative and normal models}
+\caption{Performance of the negative and normal models.}
 \label{tab:1}
 \begin{tabular}{lcc}
 \hline\noalign{\smallskip}
@@ -1511,7 +1511,7 @@ Both inaccurate & 2536 \\
 \section{Training processes}
 \label{datasettraining}
 
-The training processes for our model are very similar to our previous experiments with the MNIST dataset. \cite{milovsevic2019classification} The first step in the training process is to train the normal, unmodified network. The training parameters have been described in section \ref{modelarch}. After the training of the normal model we freeze its convolutional layers because they are to be used in other models.
+The training processes for our model are very similar to our previous experiments with the MNIST dataset. \cite{milovsevic2019classification} The first step in the training process is to train the normal, unmodified network. The training parameters have been described in Section \ref{modelarch}. After the training of the normal model we freeze its convolutional layers because they are to be used in other models.
 
 The second network we train is the negative network. The training process is the same as with the normal network apart from that the convolutional layers are already trained and loaded before training. In a way, we are performing fine-tuning of the network with the frozen convolutional layers from the normal network and with the negation operation activated. 
 \subsection{Synergy network}
@@ -1599,7 +1599,7 @@ Syn. & \textbf{7.53} & 7.07 & -0.97 & -3.00 & 6.43 & -4.41 & -4.44 & -6.07 & 0.0
 \begin{figure}
     \centering
     \includegraphics[width=0.3\textwidth]{figures/fig2.png}
-\caption{Input examples: \#2 (ship), \#6418 (airplane), \#7396 (ship)}
+\caption{Input examples: \#2 (ship), \#6418 (airplane), \#7396 (ship).}
 \label{fig:2} 
 \end{figure}
 
@@ -1642,7 +1642,7 @@ Trained Synergy (hot-start) & 64.28 & 0.98 \\
 \end{tabular}
 \end{table}
 
-Last two models, as described in section \ref{other new models} represent simple tests whether our approach is valid. The trained synergy proved that simply increasing the number of parameters is not enough. Both the trained synergy and the hot starting trained synergy models perform worse than the base synergy model as can be seen in Table \ref{tab:6}. The reason for this, we believe, is that during training the error is calculated and backpropagated on both the normal and negative parts of the network at the same time making it harder to converge. This is especially notable for the trained synergy model where we change a larger number of parameters (convolutional layers). 
+Last two models, as described in Section \ref{other new models} represent simple tests whether our approach is valid. The trained synergy proved that simply increasing the number of parameters is not enough. Both the trained synergy and the hot starting trained synergy models perform worse than the base synergy model as can be seen in Table \ref{tab:6}. The reason for this, we believe, is that during training the error is calculated and backpropagated on both the normal and negative parts of the network at the same time making it harder to converge. This is especially notable for the trained synergy model where we change a larger number of parameters (convolutional layers). 
 
 Regarding training performance, normal and negative models were comparable in training time (with negative model being faster to train because of the copied frozen convolutional layers) while trained synergy models took longer because of the higher number of parameters to be calculated. The synergy network is not trained, therefore not comparable in training times to others.
 
@@ -1697,7 +1697,7 @@ Similar to our previous work \cite{milovsevic2019classification}, it is importan
 \begin{figure}
     \centering
     \includegraphics[width=0.7\textwidth]{figures/fig3.png}
-\caption{Input example \#8 from CIFAR-10 validation set with various levels of occlusion added. From left to right: original image, \( 10\% \) removed, \( 20\% \) removed, \( 30\% \) removed}
+\caption{Input example \#8 from CIFAR-10 validation set with various levels of occlusion added. From left to right: original image, \( 10\% \) removed, \( 20\% \) removed, \( 30\% \) removed.}
 \label{fig:3} 
 \end{figure}
 
@@ -1858,7 +1858,7 @@ keep expressive (i.e. high dimensional) mono-modal representations.
 \begin{figure}
     \centering
     \includegraphics[scale=0.25]{figures/block.png}
-    \caption{Example of Visual Question Answering architecture from BLOCK Fusion proposed method \cite{ben2019block}}
+    \caption{Example of Visual Question Answering architecture from BLOCK Fusion proposed method \cite{ben2019block}.}
     \label{fig:block}
 \end{figure}
 
@@ -1876,7 +1876,7 @@ on a multimodal space;
     \item a bilinear interaction where the tensor is expressed
 as a Tucker decomposition;
     \item a bilinear interaction where the tensor is expressed
-as a CP decomposition;
+as a CP (tensor rank, CANDECOMP/PARAFAC) decomposition;
     \item a bilinear interaction where each 3rd mode slice matrix of the tensor is constrained by its rank;
     \item a bilinear interaction where the tensor is expressed
 as a Tucker decomposition, and where its core tensor has the
@@ -1955,7 +1955,7 @@ In the Table \ref{tab:results-fgsm-synergy} and Figure \ref{fig:fgsm_chart_syner
         
     \end{axis}
     \end{tikzpicture}
-    \caption{Accuracy of normal and synergy models against FGSM}
+    \caption{Accuracy of normal and synergy models against FGSM.}
     \label{fig:fgsm_chart_synergy}
 \end{figure}
 
@@ -2204,7 +2204,7 @@ In our second experiment we decided to see if this approach can be used as a fin
         
     \end{axis}
     \end{tikzpicture}
-    \caption{Comparison of Siamese Model fine-tuning techniques. TSN network is unmodified Triplet loss Siamese Network, TSN-N is the same network with the positive side ignored for updates and the TSN-P is the same network with the negative side ignored for updates. TSN-N network manages to increase accuracy while the TSN-P network degrades it. Final (best) accuracies: 93.84\% (TSN), 92.92\% (TSN-P), 93.91\% (TSN-N)}
+    \caption{Comparison of Siamese Model fine-tuning techniques. TSN network is unmodified Triplet loss Siamese Network, TSN-N is the same network with the positive side ignored for updates and the TSN-P is the same network with the negative side ignored for updates. TSN-N network manages to increase accuracy while the TSN-P network degrades it. Final (best) accuracies: 93.84\% (TSN), 92.92\% (TSN-P), 93.91\% (TSN-N).}
     \label{fig:snn_chart}
 \end{figure}
 
@@ -2235,7 +2235,7 @@ Another use case where RL represents a state-of-the-art solution is in the Traff
 
 Of course, usage of reinforcement learning algorithms has found great success in real-world agent problems -- robotics. Some novel approaches even include models which can learn from raw videos of humans (or robots) doing different tasks and replicating that behaviour. \cite{mnih2015human}
 
-Lastly we mention games, where RL algorithms dominate model leaderboards in different competitions. \cite{mnih2013playing} \cite{silver2016mastering} Game agent development was the use case which really showed the possibilities in using these models. It is not rare that these algorithms achieve super-human performance on various games beating even most skillful of players. The most famous algorithms surely is Google's AlphaGo an algorithm which can play the game of Go, a very complex board game.
+Lastly we mention games, where RL algorithms dominate model leaderboards in different competitions. \cite{mnih2013playing,silver2016mastering} Game agent development was the use case which really showed the possibilities in using these models. It is not rare that these algorithms achieve super-human performance on various games beating even most skillful of players. The most famous algorithms surely is Google's AlphaGo an algorithm which can play the game of Go, a very complex board game.
 
 \section{Deep Q Learning}
 
