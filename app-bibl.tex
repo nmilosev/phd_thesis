@@ -1,0 +1,273 @@
+\newcounter{allpages}
+\setcounter{allpages}{\value{frontmatterpage}}
+
+\newcounter{mainpages}
+\setcounter{mainpages}{\totalpages}
+
+% offset the last increase
+\addtocounter{mainpages}{-1}
+
+\addtocounter{allpages}{\value{mainpages}}
+
+\chapter[Ključna dokumentacijska informacija]{\Large Univerzitet u Novom Sadu\\
+          Prirodno-matematički fakultet\\
+          Ključna dokumentacijska informacija}
+ 
+\noindent
+\begin{tabbing}
+  \hspace*{.3\textwidth}                                           \= \hspace*{.7\textwidth}        \kill
+  Redni broj:                                                      \>                               \\
+  RBR                                                              \>                               \\
+  Identifikacioni broj:                                            \>                               \\
+  IBR                                                              \>                               \\
+  Tip dokumentacije:                                               \> Monografska dokumentacija     \\
+  TD                                                               \>                               \\
+  Tip zapisa:                                                      \> Tekstualni štampani materijal \\
+  TZ                                                               \>                               \\
+  Vrsta rada:                                                      \> Doktorska disertacija         \\
+  VR                                                               \>                               \\
+  Autor:                                                           \> \autor                        \\
+  AU                                                               \>                               \\
+  Mentor:                                                          \> dr Miloš Racković              \\
+  MN                                                               \>                               \\
+                                                                   \>                               \\
+  Naslov rada:                                                     \> 
+    \begin{minipage}[t]{.65\textwidth}
+    \naslovsr
+  \end{minipage}                                                                                    \\
+  NR                                                               \>                               \\
+  Jezik publikacije:                                               \> engleski                      \\
+  JP                                                               \>                               \\
+  Jezik izvoda:                                                    \> srpski/engleski               \\
+  JI                                                               \>                               \\
+  Zemlja publikovanja:                                             \> Srbija                        \\
+  ZP                                                               \>                               \\
+  Uže geografsko područje:                                         \> Vojvodina                     \\
+  UGP                                                              \>                               \\
+  Godina:                                                          \> 2021                          \\
+  GO                                                               \>                               \\
+                                                                   \>                               \\
+  Izdavač:                                                         \> autorski reprint              \\
+  IZ                                                               \>                               \\
+  Mesto i adresa:                                                  \> Novi Sad, Trg D. Obradovića 4 \\
+  MA                                                               \>                               \\
+                                                                   \>                               \\
+  Fizički opis rada:                                               \> \arabic{numchapter}%
+  /\arabic{allpages} (\roman{frontmatterpage} + \arabic{mainpages})%
+  /\arabic{citenum}%
+  /\totaltables%
+  /\totalfigures%
+  /0%
+  /\arabic{chapter}                                                                                 \\
+  \hspace*{2\parindent}
+  (broj poglavlja/strana/lit. citata/tabela/slika/grafika/priloga) \>                               \\
+  FO                                                               \>                               \\
+  Naučna oblast:                                                   \> Računarske nauke              \\
+  NO                                                               \>                               \\
+  Naučna disciplina:                                               \> Mašinsko učenje
+            \\
+  ND                                                               \>                               \\
+  Predmetna odrednica                                              \>                               \\
+  PO                                                               \>                               \\
+  Ključne reči:                                                   \> 
+    \begin{minipage}[t]{.65\textwidth}
+      Veštačka inteligencija, Mašinsko učenje, Duboko učenje,
+      Neuronske mreže, Konvolutivne neuronske mreže, Robustnost,
+      Robustnost neuronskih mreža, Negativno učenje
+    \end{minipage}                                                                                  \\
+  UDK                                                              \>                               \\
+  Čuva se:                                                         \>                               \\
+  ČU                                                               \>                               \\
+  Važna napomena:                                                  \>                               \\
+  VN                                                               \>                               \\
+  Izvod:                   \`
+  \begin{minipage}[t]{.8\textwidth}
+  U današnje vreme upotreba dubokog učenja radi prepoznavanja određenih paterna u podacima postala je nezamenljiv alat u mnogim sistemima. U kritičnim sistemima pogotovo, duboke neuronske mreže se često koriste čak i u scenarijima koji direktno utiču na naše živote. Upravo to je razlog što se u poslednje vreme u istraživanju sve više stavlja akcenat na duboko razumevanje ovih modela i na modele koji su dokazano pouzdani, robusni i sigurni za upotrebu.
+
+U ovoj doktorskoj disertaciji istražujemo negativne modele dubokog mašinskog učenja kao novi pristup razvoju modela sa visokim performansama i još važnije sa povećanom robustnošću i pouzdanošću u poređenju sa modelima današnjice. Takođe se bavimo nadogradnjama postojećih modela sa našim negativnim pristupom i pokazujemo kako se postojeći modeli mogu unaprediti bez velikih promena u arhitekturi.
+
+Kod modela za klasifikaciju slika (danas najrasprostranjenija primena dubokih konvolutivnih neuronskih mreža) pokazaćemo kako se ovi modeli mogu nadograditi i izmeniti kako bi u obzir uzimali i negativne osobine -- one osobine koje znamo da postoje a nisu trenutno prisutne u ulaznim podacima.
+
+Za sve modele predstavljene u ovoj disertaciji biće prikazana duboka analiza procesa kao što su negacije osobina, negativne aktivacione funkcije, zamrzavanje slojeva neuronskih mreža, transfer znanja iz jedne mreže u drugu, fine-tuning pristup treniranju, inverzije konvolutivnih filtera i drugo.
+
+\end{minipage}\\
+
+\ \`
+\begin{minipage}[t]{.8\textwidth}
+  Dodatno znanje, u obliku negativnog znanja, može biti veoma bitan faktor u učenju i kreaciji modela koji imaju povećanu preciznost, pouzdanost i robustnost, pogotovo u teškim situacijama. Definišemo teške situacije kao one situacije u kojima je model suočen sa podacima koji su izmenjeni ili teži za razumevanje na neki način, bilo na prirodan način ili veštački način. Na primer, modeli predstavljeni u ovom radu su testirani u slučajevima parcijalnih ulaza i okluzija gde su delovi ulaznih podataka odstranjeni ili zaklonjeni na neki način. Negativni modeli u ovakvim situacijama imaju znatno više performanse u poređenju sa običnim, tradicionalnim modelima iste arhitekture. Za veštački generisane situacije, govorićemo o adversarijalnim mrežama, podacima i napadima i kakve su performanse naših negativnih modela kada se suoče sa takvim podacima. Testirani su black-box i white-box adversarijalni napadi i odabrani su oni napadi koji danas predstavljaju najnaprednije moguće metode za namerna kvarenja modela dubokog učenja.
+
+U ovoj disertaciji takođe uvodimo pojam mreže sinergije, koja predstavlja spoj normalne i negativne mreže i kao takva se može koristiti i primeniti na bilo koji postojeći model. U sinergiji deo mreže ili cela mreža se dodaje na postojeći model u kombinaciji sa određenim modifikacijama kako bi se uključilo negativno duboko učenje. Pokazaćemo da ovakvi modeli imaju još više performanse u poređenju sa negativnim modelima i eksperimentisaćemo sa raznim načinima spajanja mreža. Model sinergije će biti testiran na CIFAR10 skupu podataka dok su negativni modeli razvijani i testirani na MNIST i EMNIST skupovima podataka.
+
+Na kraju, govorićemo o modelima koji koriste "pravo" negativno učenje, a to su oni modeli koji koriste samo negativno znanje za učenje. Biće dat prikaz postojećih sličnih modela kao što su Negative Sampling modeli, Noisy Label Classification modeli i modeli koji koriste Noise Contrastive Estimation. Naš fokus je na dva modela za koje ćemo predložiti i implementirati nadogradnje a to su: negativna Deep Q-Learning agentska neuronska mreža i negativna sijamska Triplet Loss mreža. Oba ova modela mogu biti korišćena uz pomoć samo negativnih podataka, u nekim slučajevima za potpuno treniranje a u nekim slučajevima kao vid regularizacije.
+    \end{minipage}                                          \\
+  IZ                       \>                               \\
+  Datum prihvatanja teme od strane \>                       \\
+  Senata:                 \> XX.XX.XXXX.                     \\
+  DP                       \>                               \\
+  Datum odbrane:           \>                     \\
+  DO                       \>                               \\
+  Članovi komisije:        \>                               \\
+  \hspace*{\parindent}
+  (Naučni stepen/ime i prezime/zvanje/fakultet) \>          \\
+  KO                       \>                               \\
+  Predsednik:              \`
+    \begin{minipage}[t]{.7\textwidth}
+    dr Srđan Škrbić, redovni profesor,\\
+    Univerzitet u Novom Sadu, Prirodno-matematički fakultet
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Mentor:                    \`
+    \begin{minipage}[t]{.7\textwidth}
+    dr Miloš Racković, redovni profesor,\\
+    Univerzitet u Novom Sadu, Pri\-ro\-d\-no-ma\-te\-ma\-ti\-č\-ki fakultet
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Član:                    \`
+    \begin{minipage}[t]{.7\textwidth}
+    dr Miloš Radovanović, redovni profesor,\\
+    Univerzitet u Novom Sadu, Prirodno-matematički fakultet
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Član:                    \`
+    \begin{minipage}[t]{.7\textwidth}
+    dr Jelena Slivka, docent,\\
+    Univerzitet u Beogradu, Fakultet tehničkih nauka
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Član:                    \`
+    \begin{minipage}[t]{.7\textwidth}
+    dr Vladimir Lončar, naučni saradnik,\\
+    Institut za fiziku, Zemun
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+\end{tabbing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 5%%%%%%%%%%%%%
+
+\chapter[Key Words Documentation]{\Large University of Novi Sad\\
+          Faculty of Science\\
+          Key Words Documentation}
+ 
+\noindent
+\begin{tabbing}
+  \hspace*{.3\textwidth}   \= \hspace*{.7\textwidth}        \kill
+  Accession number:        \>                               \\
+  NO                       \>                               \\
+  Identification number:   \>                               \\
+  INO                      \>                               \\
+  Document type:           \> Monograph documentation       \\
+  DT                       \>                               \\
+  Type of record:          \> Textual printed material      \\
+  TR                       \>                               \\
+  Contents code:           \> Doctoral dissertation             \\
+  CC                       \>                               \\
+  Author:                  \> \autor                  \\
+  AU                       \>                               \\
+  Mentor:                  \> Dr.~Miloš Racković          \\
+  MN                       \>                               \\
+                           \>                               \\
+  Title:                   \>
+    \begin{minipage}[t]{.7\textwidth}
+      \naslov
+    \end{minipage}                                          \\
+    TI                       \>                               \\
+    Language of text:        \> English                       \\
+    LT                       \>                               \\
+    Language of abstract     \> Serbian/English               \\
+    LA                       \>                               \\
+    Country of publication:  \> Serbia                        \\
+    CP                       \>                               \\
+    Locality of publication: \> Vojvodina                     \\
+    LP                       \>                               \\
+    Publication year:        \> 2021                          \\
+    PY                       \>                               \\
+    \>                               \\
+    Publisher:               \> Author's reprint              \\
+    PU                       \>                               \\
+    Publ. place:             \> Novi Sad, Trg D.~Obradovića 4 \\
+    PP                       \>                               \\
+    \>                               \\
+    Physical description:    \> \arabic{numchapter}%
+/\arabic{allpages} (\roman{frontmatterpage} + \arabic{mainpages})%
+/\arabic{citenum}%
+/\totaltables%
+/\totalfigures%
+/0%
+/\arabic{chapter}\\
+    \hspace*{\parindent}
+    (no. chapters/pages/bib.~refs/tables/figures/graphs/appendices)\> \\
+    PO                       \>                               \\
+    Scientific field:        \> Computer Science              \\
+    SF                       \>                               \\
+    Scientific discipline:   \> Machine Learning  \\
+    SD                       \>                               \\
+    Subject/Key words: \>
+    \begin{minipage}[t]{.65\textwidth}
+      Artificial Intelligence, Machine Learning, Deep Learning,
+      Neural Networks, Convolutional Neural Networks, Robustness,
+      Neural Network Robustness. Negative Learning
+    \end{minipage}                                          \\
+  SKW                      \>                               \\
+  UC                       \>                               \\
+  Holding data:            \>                               \\
+  HD                       \>                               \\
+  Note:                    \>                               \\
+  N                        \>                               \\
+  Abstract:                \`
+  \begin{minipage}[t]{.8\textwidth}
+    In recent times the use of Deep Learning as a tool for pattern recognition and more has become essential for many tasks. In critical systems specifically these models are often used in human life affecting environments and that is the reason for new and recent research regarding these models and and their robustness and reliability. 
+
+In this thesis we explore negative deep learning as a new approach to developing models which have higher performance and more importantly increased robustness compared to normal models used today. Moreover we show how many existing models can be upgraded to employ some kind of negative deep learning without large architectural changes.
+
+We will discuss how image classification neural networks (most popular use case of the convolutional neural network family) can be modified to take into consideration missing (negative) features from input samples when making their decisions. 
+
+We provide deep explanation of the feature negating process, experimenting with different activation functions, neural network layer freezing, Transfer Learning and Fine Tuning approaches, convolutional kernel inversions and more.
+\end{minipage}\\
+\  \`
+\begin{minipage}[t]{.8\textwidth}
+  We show that by employing this additional knowledge we create models with increased robustness, especially in difficult scenarios. We define difficult scenarios as those which are naturally or artificially difficult for modern neural networks. For example, we benchmark our models in the cases of partial input examples and occlusion against normal models of same architecture to show our modifications bring performance and robustness is this type of classification tasks. For artificial scenarios, we show that our models are less susceptible to adversarial attacks, both white-box and black-box. We test with state-of-the-art adversarial algorithms and see various level of improvements for different attacks and datasets (MNIST, EMNIST variants).
+
+In this thesis we also introduce the notion of a Synergy model, a model which is a pure upgrade of any neural network model where additional model, or part of it, is appended with the negativity embedded into the underlying signal processing. We show that the Synergy models can generally outperform our negative models without any performance penalty when comparing to normal models. We also experiment with different state-of-the-art Ensemble network joining methods and show how they differ in implementation effort and performance. The synergy models is tested against more complex CIFAR10 dataset and its adversarial modifications, both human and artificial.
+
+Lastly we mention true negative deep learning models, which are those which use only negative knowledge for learning. An overview of existing models is provided including Negative Sampling, Noisy Label Classification and Noise Contrastive Estimation. We focus on two models for which we provide upgrades and implementations: a negative Deep Q-Learning agent in a Deep Reinforcement Learning Task and a negative-only Siamese Triplet Loss network. Both these models, we show, can be used in a negative-only scenarios, some for regularization purposes, some for complete training.
+    \end{minipage}                                          \\
+  AB                       \>                               \\
+  Accepted on Senate: \>   XX.XX.XXXX.      \\
+  AS                       \>                               \\
+  Defended:                \>                        \\
+  DE                       \>                               \\
+  \begin{minipage}[t]{.7\textwidth}
+    Thesis Defend Board:\\
+    \hspace*{\parindent}(Degree/first and last name/title/faculty)
+  \end{minipage}\>             \\
+  DB                       \>                               \\
+  President: \`
+    \begin{minipage}[t]{.7\textwidth}
+    Dr.~Srđan Škrbić, full professor,\\
+    University of Novi Sad, Faculty of Sciences
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Mentor:                  \`
+    \begin{minipage}[t]{.7\textwidth}
+    Dr.~Miloš Racković, full professor,\\
+    University of Novi Sad, Faculty of Sciences
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Member:                  \`
+    \begin{minipage}[t]{.7\textwidth}
+    Dr.~Miloš Radovanović, full professor,\\
+    University of Novi Sad, Faculty of Sciences
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Member:                  \`
+    \begin{minipage}[t]{.7\textwidth}
+    Dr.~Jelena Slivka, assistant professor,\\
+    University of Novi Sad, Faculty of Technical Sciences
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+  Member:                  \`
+    \begin{minipage}[t]{.7\textwidth}
+    Dr.~Vladimir Lončar, research associate,\\
+    Institute of Physics, Zemun
+    \vspace*{1mm}
+    \end{minipage}                                          \\
+\end{tabbing}
