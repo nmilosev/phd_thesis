@@ -21,6 +21,8 @@
 \AtBeginDocument{\renewcommand {\epigraphflush}{center}}
 \renewcommand {\sourceflush} {center}
 
+
+
 %tikz
 \usepackage{pgfplots}
 \pgfplotsset{width=10cm,compat=1.9}
@@ -32,6 +34,9 @@
 
 \usepackage[autostyle=true]{csquotes}
 
+\usepackage{silence}
+\WarningFilter{ctable}{Transparency disabled:}
+\usepackage{ctable}[bgopacity=1]
 % needs this declaration for ayodeji
 \DeclareUnicodeCharacter{1ECD}{\d o}
 
@@ -40,9 +45,8 @@
 \usepackage{nimbusmono}
 \renewcommand{\familydefault}{\sfdefault}
 
+\usepackage{pdfpages}
 \usepackage{ccicons}
-
-\usepackage{ctable}
 \usepackage{wrapfig}
 
 \newcommand{\autor}{Nemanja Milošević}
@@ -416,7 +420,7 @@ Our "seat of consciousness", the brain, is the main object of study in neuroscie
 
 Neurons or nerve cells are built from two major parts: cell body (soma) which contains a cell nucleus and a number of fibers called dendrites on of which is longer than the others (axon). Axon length is particularly interesting, some can be up to a meter long. A typical biological neuron makes connections with 10 to 100000 other neurons at junctions which are called synapses. Signals are propagated though neurons by the means of a complicated electrochemical reaction. The signals are used to control brain activity but can also enable long-term changes in connections between neurons. We believe that these mechanisms enable our brains to learn. It is amazing to think that a structure of simple cells can lead to thoughts or that in other words: brains cause minds (John Searle, 1992). \cite{searle1992rediscovery}
 
-\section{Reappearance of Neural Networks with Modern Hardware Development}
+\section[Neural Networks Modern Hardware Development]{Reappearance of Neural Networks with Modern Hardware Development}
 
 With modern GPU (graphical processor unit) development, especially the developments related to the NVIDIA CUDA framework, deep neural network models were suddenly possible and obtainable.
 
@@ -570,7 +574,7 @@ GANs and other adversarial learning methods have found their use not only for ge
 
 Another great success in the field of Machine Learning and specifically Deep Learning was the introduction of deep reinforcement learning algorithms. In the scene set, an agent enabled with a powerful neural network model must learn to perform some task by trial and error, with any guidance from its human operator. DeepMind demonstrated that this type of learning algorithm can be taught to play old Atari games, reaching and surpassing human levels of play. \cite{mnih2013playing} Deep Reinforcement Learning models also made headlines when AlphaGo \cite{silver2016mastering}, a trained agent playing the board game Go, was developed and defeated world champions on several occasions. Another area where these algorithms have found great success is in robotics and also in self-driving cars \cite{dosovitskiy2017carla} -- a very popular field nowadays. We will cover deep reinforcement learning in more detail later in this manuscript.
 
-\section{Future of Deep Learning and Towards Artificial General Intelligence}
+\section[Future of Deep Learning and Towards AGI]{Future of Deep Learning and Towards Artificial General Intelligence}
 
 This section contains some authors speculations about the future of Deep Learning and its uses.
 
@@ -1383,7 +1387,7 @@ The results of the experiment with various \( \epsilon \) values can be seen in 
     \label{fig:fgsm_chart}
 \end{figure}
 
-\subsection{Black-box attacks: Black Box Projected Gradient Descent Attack on the Negative Models}
+\subsection{Black-box Attacks: Black Box Projected Gradient Descent Attack on the Negative Models}
 
 In contrast to the white-box adversarial attacks black-box attacks do not have direct access to the attacked network parameters. Instead they use different data to learn how to manipulate data in a way so that it is misclasified. One common way to use black-box attacks is to use a donor neural network (sometimes called a Holdout network) which the attacking algorithm studies and tries to figure out ways to manipulate it. Then this adversarial data generated based on the Holdout network is used in adversarial attacks on other networks. One algorithm that can be used in both white-box and black-box scenarios is the Projected Gradient Descent (PGD) \cite{madry2017towards} adversarial attack. It is normally used as a black-box algorithm with Holdout and Target networks but it can also be used as a white-box algorithm if both networks are the same. PGD attack is very similar to the previously used FGSM attack as it uses gradients from the Holdout network to try and maximize the loss function and in that way create adversarial examples which are wrongly classified. The difference between PGD and FGSM is that PGD limits the size of the perturbation (e.g. number of pixels) to keep the changes local and direct while the FGSM changes the entire input sample. The advantage of changing only local parts of the image is that it is more likely that humans will still be able to classify the input image correctly as only one part of it is changed. Another benefit of this approach is in generative models where we can actually deduce what are the differences in input data between specific class. For example if we have dataset of images of animals, PGD will be able to learn that if a beak is added the image will be classified as an image of a bird. If used in this way, PGD can provide us with the most important features of a class in dataset.
 
@@ -1784,7 +1788,7 @@ Trained Synergy (h.s.) & 64.28 & 52.73 & 54.37 & 62.00 & 46.27 \\
 \end{tabular}
 \end{table}
 
-\section{Experiments with Different Network Joining Techniques}
+\section[Different Network Joining Techniques]{Experiments with Different Network Joining Techniques}
 
 In synergy nets, one of the questions which needs to be answered is on model joining. In other words how can outputs of two models be joined and a single result produced. In our classification problem, both networks are created in such a way that they output probabilities, per-class for every known class in the dataset. So the output of both networks is a one-dimensional vector of length \( N \) where \( N = \text{number of classes in the dataset} \). These two vectors of probabilities need to be equally considered and joined so our joint model can make a prediction/decision.
 
@@ -1959,7 +1963,6 @@ In the Table \ref{tab:results-fgsm-synergy} and Figure \ref{fig:fgsm_chart_syner
 \begin{figure}
     \centering
     \begin{tikzpicture}
-    \label{chart:fgsm_synergy}
     \begin{axis}[
         xlabel={\(\epsilon\) - FGSM attack modifier},
         ylabel={Accuracy on the adversarial testset},
@@ -2059,7 +2062,7 @@ The results can be seen in Table \ref{tab:results-others-synergy}, default hyper
   \label{tab:results-others-synergy}
 \end{table} 
 
-\section{Short Summary and Conclusions for the Synergy Models}
+\section[Summary and Conclusions for the Synergy Models]{Short Summary and Conclusions for the Synergy Models}
 \label{summary}
 
 In this part we discussed our discovery of some shortcomings of our classification based on missing features approach. Firstly, we validated our previous results on the more complex CIFAR-10 dataset and then experimented with introducing an ensemble synergy model of the traditional CNN and our negative CNN to further boost performance. In our experiments we have showed that there is definitely a possibility for more accurate models when using this approach. We have also shown where the increase in performance comes from -- the cases where one network is uncertain and the other is highly confident. In our initial testing with partial input data we also show that our modifications (that can be applied to any convolutional neural network) lead to notable accuracy gains in these cases without any major architectural changes.
@@ -2203,7 +2206,6 @@ In our second experiment we decided to see if this approach can be used as a fin
 \begin{figure}
     \centering
     \begin{tikzpicture}
-    \label{chart:fgsm}
     \begin{axis}[
         xlabel={Epochs},
         ylabel={Validation Accuracy},
@@ -2372,7 +2374,7 @@ We would also like to experiment with several of the negative learning process u
 \setcounter{numchapter}{\value{chapter}}
 
 \part{Appendices}
-\chapter{Source code and Reproducibility}
+\chapter{Source Code and Reproducibility}
 \label{source}
 
 The source code for our models and the training processes can be found on the following links: 
@@ -2432,7 +2434,7 @@ including Artificial Intelligence 1, Databases 1 and 2, Business Software Develo
 He coauthored four papers as conference proceedings and
 journal articles. He was a conference presenter more than ten times both on national and international conferences. He participated as a Machine Learning researcher on both national (GRASP - Graphs in Space: Graph Embeddings for Machine Learning on Complex Data) and international projects including H2020 projects (I-BiDaas - Industrial-Driven Big Data as a Self-Service Solution, C4IIOT - Cyber security 4.0: Protecting the Industrial Internet of Things).
 
-He is an supporter of Open Source Software and a contributor to several open source software projects most notably, Fedora Project and PyTorch.
+He is a supporter of Open Source Software and a contributor to several open source software projects most notably, Fedora Project and PyTorch.
 
 \vfill
 
@@ -2469,4 +2471,5 @@ Otvoreno podržava razvoj slobodnog softvera i deo je razvojnog tima više proje
 \end{otherlanguage}
 
 \include{app-bibl}
+\includepdf[pages=-]{Plan-tretmana-podataka.pdf}
 \end{document}
